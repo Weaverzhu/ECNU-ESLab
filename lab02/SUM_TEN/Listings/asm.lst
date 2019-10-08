@@ -1,0 +1,86 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             Reset,DATA,READONLY ;?????Reset
+                                                            
+    2 00000000 12345678        DCD              0X12345678
+    3 00000004 00000000        DCD              Reset_Handler
+    4 00000008                 AREA             CODE_SEGMET,CODE,READONLY 
+                                                            ;?????CODE_SEGMENT
+    5 00000000                 ENTRY
+    6 00000000         Reset_Handler
+                               proc
+    7 00000000                 export           Reset_Handler    [weak]
+    8 00000000 F04F 0100       MOV              R1,#0
+    9 00000004 F04F 0201       MOV              R2,#1
+   10 00000008 F04F 0000       MOV              R0,#0
+   11 0000000C 4408            ADD              R0,R0,R1
+   12 0000000E 4410            ADD              R0,R0,R2
+   13 00000010 F04F 0408       MOV              R4,#8       ;
+   14 00000014         start
+   15 00000014 EB01 0302       ADD              R3,R1,R2
+   16 00000018 4418            ADD              R0,R0,R3
+   17 0000001A 4611            MOV              R1,R2
+   18 0000001C 461A            MOV              R2,R3
+   19 0000001E 1E64            SUBS             R4,R4,#1
+   20 00000020 D1F8            BNE              start
+   21 00000022 BF00            NOP
+   22 00000024                 ENDP
+   23 00000024                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\asm.d -o.\objects\asm.o -IC:\Users\10175102111\Deskto
+p\สตั้02\SUM_TEN\RTE -Id:\Keil_v5\ARM\PACK\TexasInstruments\MSP432P4xx_DFP\3.2.
+5\Device\Include -Id:\Keil_v5\ARM\CMSIS\Include --predefine="__UVISION_VERSION 
+SETA 521" --predefine="__MSP432P401R__ SETA 1" --list=.\listings\asm.lst USER\a
+sm.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Reset 00000000
+
+Symbol: Reset
+   Definitions
+      At line 1 in file USER\asm.s
+   Uses
+      None
+Comment: Reset unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+CODE_SEGMET 00000000
+
+Symbol: CODE_SEGMET
+   Definitions
+      At line 4 in file USER\asm.s
+   Uses
+      None
+Comment: CODE_SEGMET unused
+Reset_Handler 00000000
+
+Symbol: Reset_Handler
+   Definitions
+      At line 6 in file USER\asm.s
+   Uses
+      At line 3 in file USER\asm.s
+      At line 7 in file USER\asm.s
+
+start 00000014
+
+Symbol: start
+   Definitions
+      At line 14 in file USER\asm.s
+   Uses
+      At line 20 in file USER\asm.s
+Comment: start used once
+3 symbols
+337 symbols in table
