@@ -1,6 +1,0 @@
---cpu Cortex-M4.fp
-".\objects\asm.o"
---strict --scatter ".\Objects\SUM_TEN.sct"
---summary_stderr --info summarysizes --map --xref --callgraph --symbols
---info sizes --info totals --info unused --info veneers
---list ".\Listings\SUM_TEN.map" -o .\Objects\SUM_TEN.axf

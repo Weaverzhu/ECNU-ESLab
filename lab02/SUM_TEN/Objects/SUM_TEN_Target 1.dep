@@ -1,2 +1,0 @@
-Dependencies for Project 'SUM_TEN', Target 'Target 1': (DO NOT MODIFY !)
-F (.\USER\asm.s)(0x5D9BF43D)(--cpu Cortex-M4.fp -g --apcs=interwork -IC:\Users\10175102111\Desktop\สตั้02\SUM_TEN\RTE-Id:\Keil_v5\ARM\PACK\TexasInstruments\MSP432P4xx_DFP\3.2.5\Device\Include-Id:\Keil_v5\ARM\CMSIS\Include--pd "__UVISION_VERSION SETA 521" --pd "__MSP432P401R__ SETA 1"--list .\listings\asm.lst --xref -o .\objects\asm.o --depend .\objects\asm.d)
