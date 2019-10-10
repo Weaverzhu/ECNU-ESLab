@@ -1,3 +1,5 @@
+*tar*
+
 # Prerequisites
 *.d
 *.pdf
@@ -54,3 +56,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
