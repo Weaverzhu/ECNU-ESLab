@@ -4,12 +4,12 @@
 %\documentclass[a4paper,10pt,UTF8]{ctexart}
 
 \usepackage[english]{babel}
-\usepackage{fancyhdr,array,lastpage,amsmath,mathtools,enumitem,graphicx,multirow,tocbibind,longtable,makecell,varwidth,titlesec,bm,booktabs,comment}
+\usepackage{fancyhdr,array,lastpage,amsmath,mathtools,enumitem,graphicx,multirow,tocbibind,longtable,makecell,varwidth,titlesec,bm,booktabs,comment,listings,minted}
 \usepackage{enumitem}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
-%\setCJKmainfont[BoldFont=Heiti SC Medium]{Songti SC Light}
-%\setCJKsansfont{Heiti SC}
+% \setCJKmainfont[BoldFont=PingFang SC]{PingFang SC}
+% \setCJKsansfont{PingFang SC}
 
 \usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
@@ -26,6 +26,11 @@
 \usepackage{alphalph}
 \usepackage{indentfirst}
 
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
 \newenvironment{sol}
   {\par\vspace{2mm}\noindent{\bf Solution}. }
 
@@ -40,6 +45,20 @@
 
 \numberwithin{equation}{section}
 \numberwithin{figure}{section}
+
+\lstset{
+ columns=fixed,       
+ numbers=left,                                        % 在左侧显示行号
+ numberstyle=\tiny\color{gray},                       % 设定行号格式
+ frame=none,                                          % 不显示背景边框
+ backgroundcolor=\color[RGB]{245,245,244},            % 设定背景颜色
+ keywordstyle=\color[RGB]{40,40,255},                 % 设定关键字颜色
+ numberstyle=\footnotesize\color{darkgray},           
+ commentstyle=\it\color[RGB]{0,96,96},                % 设置代码注释的格式
+ stringstyle=\rmfamily\slshape\color[RGB]{128,0,0},   % 设置字符串格式
+ showstringspaces=false,                              % 不显示字符串中的空格
+language=c++,
+}
 
 \usepackage{karnaugh}
 \usepackage{circuitikz}
@@ -57,42 +76,42 @@
 \rhead{}
 \makeatletter
 \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi%
-\color{gray}\hrule\@height 0.2pt\@width\headwidth}
-  \vspace{6mm}}
+	\color{gray}\hrule\@height 0.2pt\@width\headwidth}
+	\vspace{6mm}}
 \makeatother
 
 \newcommand{\HRule}{\rule{\linewidth}{1mm}}
 \newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
 
 {\center {\huge \bfseries \LARGE{华东师范大学计算机科学技术系上机实验报告}} \\ [0.8cm]
-
-\small{
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{课程名称：} 嵌入式系统\\
-    \textbf{指导教师：} 沈建华\\
-    \textbf{上机实践名称：} 汇编语言程序设计\\
-    \textbf{实践编号：}实验2
-  \end{minipage}
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{年级：}17 级\\
-    \textbf{姓名：}朱桐\\
-    \textbf{学号：}10175102111\\
-  \end{minipage} 
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{上机实践成绩：} \\
-    \textbf{创新实践成绩：} \\
-    \textbf{上机实践日期：}2019/10/08\\
-    \textbf{上机实践时间：}2 学时\\
-  \end{minipage}
-}
-\HRule \\[0.5cm]
+		
+	\small{
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{课程名称：} 嵌入式系统\\
+			\textbf{指导教师：} 沈建华\\
+			\textbf{上机实践名称：} 汇编语言程序设计\\
+			\textbf{实践编号：}实验2
+		\end{minipage}
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{年级：}17 级\\
+			\textbf{姓名：}朱桐\\
+			\textbf{学号：}10175102111\\
+		\end{minipage} 
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{上机实践成绩：} \\
+			\textbf{创新实践成绩：} \\
+			\textbf{上机实践日期：}2019/10/08\\
+			\textbf{上机实践时间：}2 学时\\
+		\end{minipage}
+	}
+	\HRule \\[0.5cm]
 }
 \section{实验目的}
 
 \begin{enumerate}
-    \item 学习并掌握简单的ARM汇编指令（MOV、ADD、SUB、CMP、LDR、逻辑指令等），熟悉其功能及用法
-    \item 熟悉基本汇编程序的程序语法及设计格式，能写出简单的汇编程序
-    \item 学会调试汇编程序，能及时发现并改正错误
+	\item 学习并掌握简单的ARM汇编指令（MOV、ADD、SUB、CMP、LDR、逻辑指令等），熟悉其功能及用法
+	\item 熟悉基本汇编程序的程序语法及设计格式，能写出简单的汇编程序
+	\item 学会调试汇编程序，能及时发现并改正错误
 \end{enumerate}
 
 \section{实验设备}
@@ -102,8 +121,8 @@
 \section{实验内容}
 
 \begin{enumerate}
-  \item 学习Keil中的汇编语言格式
-  \item 对例子程序进行单步调试，观察寄存器和内存单元的值变化
+	\item 学习Keil中的汇编语言格式
+	\item 对例子程序进行单步调试，观察寄存器和内存单元的值变化
 \end{enumerate}
 
 \section{实验原理}
@@ -116,24 +135,232 @@
 
 在ARM汇编程序中使用注释，注释内容由“;”开始一直到此行结束，注释可以顶格写；
 注意：
-	“;”相当于C语言中的“//”
+“;”相当于C语言中的“//”
 
 定义变量、常量时，其标识符必须顶格书写，否则编译器报错
 
 函数名需要顶格写。
 
 
+\subsection{while 循环}
+
+我们已经有循环的概念，那么怎么在汇编中使用循环呢？
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+    framesep=2mm]{asm}
+
+    MOV R1,#10
+    loop
+        SUBS R1,R1,#1
+        BNE loop
+
+\end{minted}
+
+我们使用分支跳转语句，可以做一个类似while 循环，上面代码相当于用 r1 寄存器作为循环变量，做while循环，等价于
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+    framesep=2mm]{c}
+
+    r1 = 10;
+    do {
+        r1 = r1 - 1;
+    } while (r1 >= 0);
+
+\end{minted}
+
+
+\subsection{if 语句}
+
+我们可以使用一个标记来实现一个没有 elses 的if语句
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+    framesep=2mm]{asm}
+
+    SUBS R2,R1,#1
+    BNE lab;
+        ; do something
+    lab
+
+\end{minted}
+
+上述代码相当于 
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+    framesep=2mm]{c}
+
+    if ((r2 = r1-1) == 0) {
+        // do something
+    }
+
+\end{minted}
+
+BNE, BEQ, BLE 等分支跳转语句将会自动获取上一次运算命令的运算结果，然后根据情况进行跳转。
 
 \section{实验步骤}
 
 \subsection{练习1}
 
-使用正常的方法，我们需要一个分支语句
+使用正常的方法，我们需要一个分支语句，也就是类似c语言中的 if 语句，而没有else即 "if ((x\&1) == 1) sum += x"。于是我们可以使用一个标号完成这个过程。将循环跳转语句即为 cont，循环体内做的操作记为 even，如果不满足if则直接跳转至 conti，就能完成这种if语句。
+
+我们只需要根据 1加到10的程序稍加修改就能得到结果
+
+\subsection{练习2}
+
+我们同样需要一个 if 没有 else 的语句。即 "if (x > 10) break。"
+
+然后就是怎么求斐波那契数列。已知前两项我们就能求出后一项，我们可以用汇编翻译下列c语言代码。
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+    framesep=2mm]{c}
+    r1 = 1;
+    r2 = 1;
+    r0 = 0;
+    do {
+        r0 = r0 + r3;
+        r3 = r1 + r2;
+        r1 = r2;
+        r2 = r3;
+        if (r3 - 10 > 10) break;
+    } while (1);
+
+\end{minted}
+
+其中 if , break 可以修改为如果小于等于10就继续循环，可以不添加新的标识。
+
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+        framesep=2mm]{asm}
+        MOV R1,#0
+        MOV R2,#1
+        MOV R0,#0
+        MOV R3,#0
+        ADD R3,R1,R2
+    start
+        ADD R0,R0,R3
+        ADD R3,R1,R2
+        MOV R1,R2
+        MOV R2,R3
+        SUBS R4,R3,#10
+        BLE start
+        NOP
+        ENDP
+        END
+
+\end{minted}
 
 \section{调试过程、结果与分析}
 
+\subsection{练习1}
+
+结果为 1E，即30，而 2+4+6+8+10 = 30，结果正确
+
+\subsection{练习2}
+
+结果为 14，而 1+1+2+3+5+8 = 20，结果正确
+
 \section{总结}
 
+这节实验体验了汇编语言的编写，用 keil5 软件编写十分便捷，调试方便。
+
+总结了一下经验
+
+\begin{itemize}
+    \item 我们可以先思考 c 语言怎么写，然后翻译过来
+    \item 基础的赋值语句可以使用 MOV
+    \item if语句可以使用添加标记和分支跳转
+    \item while语句可以结合分支跳转或者无条件跳转
+    \item 熟练使用单步调试可以在以后写更复杂程序时提供标识
+    \item 思考使用更少的语句和标识可以提高程序的运行速度
+\end{itemize}
+
 \section{附件}
+
+练习1代码
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+    framesep=2mm]{asm}
+    AREA Reset,DATA,READONLY;
+    DCD 0X12345678
+    DCD   Reset_Handler
+        AREA CODE_SEGMET,CODE,READONLY;
+        ENTRY
+    Reset_Handler  proc
+        export Reset_Handler    [weak]
+        MOV R0,#0;?????
+        MOV R1,#10;
+    start
+        ANDS R2,R1,#1
+        BNE cont
+        ADDS R0,R0,R1    
+    cont
+        SUBS R1,R1,#1
+
+        BNE start
+        NOP
+        ENDP
+        END
+
+\end{minted}
+
+练习2代码
+
+\begin{minted}[mathescape,
+    linenos,
+    numbersep=5pt,
+    gobble=2,
+    frame=lines,
+        framesep=2mm]{asm}
+        AREA Reset,DATA,READONLY;
+        DCD 0X12345678
+        DCD   Reset_Handler
+        AREA CODE_SEGMET,CODE,READONLY;
+        ENTRY
+    Reset_Handler  proc
+        export Reset_Handler    [weak]
+        MOV R1,#0
+        MOV R2,#1
+        MOV R0,#0
+        MOV R3,#0
+        ADD R3,R1,R2
+    start
+        ADD R0,R0,R3
+        ADD R3,R1,R2
+        MOV R1,R2
+        MOV R2,R3
+        SUBS R4,R3,#10
+        BLE start
+        NOP
+        ENDP
+        END
+
+\end{minted}
+
 
 \end{document}
