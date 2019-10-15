@@ -1,0 +1,1 @@
+pygmentize -l asm -f latex -P commandprefix=PYG -F tokenmerge -P mathescape=True -F gobble:n=2 -o "main.out.pyg" "main.pyg" 

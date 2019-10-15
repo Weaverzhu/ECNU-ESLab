@@ -1,0 +1,125 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             Reset,DATA,READONLY
+    2 00000000 12345678        DCD              0X12345678
+    3 00000004 00000000        DCD              Reset_Handler
+    4 00000008                 AREA             CODE_SEGMET,CODE,READONLY
+    5 00000000         Reset_Handler
+                               proc
+    6 00000000                 export           Reset_Handler    [weak]
+    7 00000000 4811            LDR              R0,=ARRAY   ;
+    8 00000002 F04F 0100       MOV              R1,#0
+    9 00000006 F04F 0300       MOV              R3,#0
+   10 0000000A         LOOP
+   11 0000000A 5842            LDR              R2,[R0,R1]  ;
+   12 0000000C F101 0104       ADD              R1,#4
+   13 00000010         NEXT
+   14 00000010 2A00            CMP              R2,#0
+   15 00000012 D0FA            BEQ              LOOP
+   16 00000014 4614            MOV              R4,R2
+   17 00000016 EA4F 2212       MOV              R2,R2,LSR#8
+   18 0000001A F004 04FF       AND              R4,#0x000000FF
+   19 0000001E 2C23            CMP              R4,#0x23    ;'#'
+   20 00000020 D00A            BEQ              EXIT
+   21 00000022 2C30            CMP              R4,#0x30    ;'0'
+   22 00000024 DBF4            BLT              NEXT
+   23 00000026 2C39            CMP              R4,#0x39    ;'9'
+   24 00000028 DCF2            BGT              NEXT
+   25 0000002A         
+   26 0000002A F1A4 0430       SUB              R4,R4,#0x30
+   27 0000002E F014 0F01       TST              R4,#1
+   28 00000032 BF18 3301       ADDNE            R3,#1
+   29 00000036 E7EB            B                NEXT
+   30 00000038         EXIT
+   31 00000038 BF00            NOP
+   32 0000003A                 ENDP
+   33 0000003A 31 30 31 
+              37 35 31 
+              30 32 31 
+              31 31 23 ARRAY   DCB              "10175102111#"
+   34 00000046                 END
+              00 00 00000000 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\asm.d -o.\objects\asm.o -IC:\Users\10175102111\Deskto
+p\lab03\ex1\RTE -Id:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.9.0\Drivers\CMSIS\De
+vice\ST\STM32F4xx\Include -Id:\Keil_v5\ARM\CMSIS\Include --predefine="__UVISION
+_VERSION SETA 521" --predefine="STM32F429xx SETA 1" --list=.\listings\asm.lst U
+SER\asm.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Reset 00000000
+
+Symbol: Reset
+   Definitions
+      At line 1 in file USER\asm.s
+   Uses
+      None
+Comment: Reset unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+ARRAY 0000003A
+
+Symbol: ARRAY
+   Definitions
+      At line 33 in file USER\asm.s
+   Uses
+      At line 7 in file USER\asm.s
+Comment: ARRAY used once
+CODE_SEGMET 00000000
+
+Symbol: CODE_SEGMET
+   Definitions
+      At line 4 in file USER\asm.s
+   Uses
+      None
+Comment: CODE_SEGMET unused
+EXIT 00000038
+
+Symbol: EXIT
+   Definitions
+      At line 30 in file USER\asm.s
+   Uses
+      At line 20 in file USER\asm.s
+Comment: EXIT used once
+LOOP 0000000A
+
+Symbol: LOOP
+   Definitions
+      At line 10 in file USER\asm.s
+   Uses
+      At line 15 in file USER\asm.s
+Comment: LOOP used once
+NEXT 00000010
+
+Symbol: NEXT
+   Definitions
+      At line 13 in file USER\asm.s
+   Uses
+      At line 22 in file USER\asm.s
+      At line 24 in file USER\asm.s
+      At line 29 in file USER\asm.s
+
+Reset_Handler 00000000
+
+Symbol: Reset_Handler
+   Definitions
+      At line 5 in file USER\asm.s
+   Uses
+      At line 3 in file USER\asm.s
+      At line 6 in file USER\asm.s
+
+6 symbols
+342 symbols in table

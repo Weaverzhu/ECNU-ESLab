@@ -1,0 +1,2 @@
+Dependencies for Project 'cal_bletter_num', Target 'Target 1': (DO NOT MODIFY !)
+F (.\USER\asm.s)(0x5DA52F68)(--cpu Cortex-M4.fp -g --apcs=interwork -IC:\Users\10175102111\Desktop\lab03\ex1\RTE-Id:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.9.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-Id:\Keil_v5\ARM\CMSIS\Include--pd "__UVISION_VERSION SETA 521" --pd "STM32F429xx SETA 1"--list .\listings\asm.lst --xref -o .\objects\asm.o --depend .\objects\asm.d)
