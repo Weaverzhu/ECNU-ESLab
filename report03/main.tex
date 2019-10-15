@@ -162,10 +162,134 @@
 
 \section{调试过程、结果与分析}
 
+\subsection{实验1}
 
+改动十分简单，DCB 常量为 "10175102111\#" 结果为8，"123456789" 结果为9
+
+\subsection{实验2}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{2.PNG}
+  \caption{copy结果}
+  \label{fig:2}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{3.PNG}
+  \caption{sort结果}
+  \label{fig:3}
+\end{figure}
 
 \section{总结}
 
+一种效率很高写arm汇编的方式是，先写好熟悉的c语言程序，然后翻译过来。
+
 \section{附件}
+
+\subsection{练习1代码}
+\begin{minted}[mathescape,
+  linenos,
+  numbersep=5pt,
+  gobble=2,
+  frame=lines,
+  framesep=2mm]{asm}
+    AREA Reset,DATA,READONLY
+    DCD 0X12345678
+    DCD   Reset_Handler
+    AREA CODE_SEGMET,CODE,READONLY
+  Reset_Handler  proc
+    export Reset_Handler    [weak]
+    LDR R0,=ARRAY          ;
+    MOV R1,#0              
+    MOV R3,#0
+  LOOP
+    LDR R2,[R0,R1]  ;
+    ADD R1,#4        
+  NEXT
+    CMP R2,#0
+    BEQ LOOP
+    MOV R4,R2
+    MOV R2,R2,LSR#8             
+    AND R4,#0x000000FF   
+    CMP R4,#0x23 ;'#'
+    BEQ EXIT
+    CMP R4,#0x30 ;'0'
+    BLT NEXT
+    CMP R4,#0x39 ;'9'
+    BGT NEXT
+
+    SUB R4,R4,#0x30
+    TST R4,#1
+    ADDNE R3,#1
+    B NEXT   
+  EXIT
+    NOP
+    ENDP
+  ARRAY DCB "10175102111#"
+    END
+
+\end{minted}
+\subsection{练习2代码}
+\begin{minted}[mathescape,
+  linenos,
+  numbersep=5pt,
+  gobble=2,
+  frame=lines,
+  framesep=2mm]{asm}
+    AREA Reset,DATA,READONLY
+    DCD 0X12345678
+    DCD   Reset_Handler
+    AREA CODE_SEGMET,CODE,READONLY
+  Reset_Handler  proc
+    export Reset_Handler    [weak]
+    MOV R0,#0x20000000
+    LDR R4,=ARRAY
+    MOV R8,#5
+    MOV R1,#0
+    MOV R2,R8
+  COPY
+    LSL R5,R1,#2
+    LDR R6,[R4,R5]
+    STR R6,[R0,R5]
+    ADD R1,R1,#1
+    CMP R1,R2
+    BNE COPY
+    
+      
+    MOV R1,#0
+    SUB R2,R8,#1
+  LOOPI
+    SUB R3,R8,#1
+  LOOPJ
+    LSL R4,R3,#2
+    ADD R4,R0,R4
+    LDR R5,[R4]
+    LDR R6,[R4,#-4]
+
+    CMP R5,R6
+    BGT NOSWAP
+    MOV R7,R5
+    MOV R5,R6
+    MOV R6,R7
+    STR R5,[R4]
+    STR R6,[R4,#-4]
+  NOSWAP
+    SUB R3,R3,#1
+    SUBS R7,R3,R1
+    BGT LOOPJ
+
+
+    ADDS R1,R1,#1
+    CMP R1,R2
+    BLT LOOPI
+  EXIT
+    NOP
+    ENDP
+  ARRAY DCD 3,2,4,5,1,6
+    END
+
+\end{minted}
 
 \end{document}
