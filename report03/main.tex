@@ -65,28 +65,27 @@
 \newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
 
 {\center {\huge \bfseries \LARGE{华东师范大学计算机科学技术系上机实验报告}} \\ [0.8cm]
-
-\small{
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{课程名称：}计算机组成与结构实践\\
-    \textbf{指导教师：}金健\\
-    \textbf{上机实践名称：} TODO\\
-    \textbf{实践编号：}实验 1
-  \end{minipage}
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{年级：}17 级\\
-    \textbf{姓名：}朱桐\\
-    \textbf{学号：}10175102111\\
-    \textbf{组号：}A
-  \end{minipage} 
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{上机实践成绩：} \\
-    \textbf{创新实践成绩：} \\
-    \textbf{上机实践日期：}2019/09/20\\
-    \textbf{上机实践时间：}2 学时\\
-  \end{minipage}
-}
-\HRule \\[0.5cm]
+		
+	\small{
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{课程名称：} 嵌入式系统\\
+			\textbf{指导教师：} 沈建华\\
+			\textbf{上机实践名称：} 汇编语言程序设计\\
+			\textbf{实践编号：}实验3
+		\end{minipage}
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{年级：}17 级\\
+			\textbf{姓名：}朱桐\\
+			\textbf{学号：}10175102111\\
+		\end{minipage} 
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{上机实践成绩：} \\
+			\textbf{创新实践成绩：} \\
+			\textbf{上机实践日期：}2019/10/15\\
+			\textbf{上机实践时间：}2 学时\\
+		\end{minipage}
+	}
+	\HRule \\[0.5cm]
 }
 \section{实验目的}
 
@@ -168,12 +167,18 @@
 
 \subsection{实验2}
 
+先将 DCD 定义的常量数组拷贝到内存中然后仿照 C 语言的冒泡排序进行排序。拷贝之后的结果如图 \ref{fig:2}。
+
+之后根据 C 语言的原型，翻译成 ARM 汇编。使用 MOV 指令完成赋值语句和 std::swap()，使用 bgt,blt 和 add 完成 for循环。这里我使用 R8 表示数组大小。注意取地址要对 4x8 二进制位对齐，因为我们使用 4 个字节表示一个整数
+
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.9\textwidth]{2.PNG}
   \caption{copy结果}
   \label{fig:2}
 \end{figure}
+
+排完序的结果如图 \ref{fig:3}
 
 \begin{figure}[h]
   \centering
