@@ -1,0 +1,97 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             Reset,DATA,READONLY
+    2 00000000 12345678        DCD              0X12345678
+    3 00000004 00000000        DCD              Reset_Handler
+    4 00000008                 AREA             CODE_SEGMET,CODE,READONLY
+    5 00000000         Reset_Handler
+                               proc
+    6 00000000                 export           Reset_Handler    [weak]
+    7 00000000         ;MOV R0,#0xA     ;用例1输入值0xA，结果0x15
+    8 00000000         ;MOV R0,#0xBA     ;用例2输入值0xAB，结果0x174
+    9 00000000         ;MOV R0,#0xCBA   ;用例3输入值0xABC，结果0x1974
+   10 00000000 F247 6054       MOV              R0,#0x7654  ;用例4输入值0x
+                                                            7654，结果0xECA9
+                                                            
+   11 00000004 4601            MOV              R1,R0       ;R1存储结果
+   12 00000006 F04F 0200       MOV              R2,#0       ;R2存储1的个数
+                                                            
+   13 0000000A F04F 0300       MOV              R3,#0       ;R3作为临时寄�
+                                                            ��器，最多只�
+                                                            �使用R0、R1、R2
+                                                            、R3及xPSR寄存�
+                                                            ��
+   14 0000000E         ;//---------------请在以下空白区域内编写代�
+                       �------------//
+   15 0000000E         
+   16 0000000E         LOOPI
+   17 0000000E F000 0301       AND              R3,R0,#1
+   18 00000012 441A            ADD              R2,R2,R3
+   19 00000014 0840            LSRS             R0,R0,#1
+   20 00000016 DCFA            BGT              LOOPI
+   21 00000018 F002 0301       AND              R3,R2,#1
+   22 0000001C F083 0101       EOR              R1,R3,#1
+   23 00000020         ;//---------------请在以上空白区域内编写代�
+                       �------------//
+   24 00000020         ;最终结果存入R1
+   25 00000020 BF00            NOP                          ;请直接跳转至
+                                                            此
+   26 00000022                 ENDP
+   27 00000022                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\asm.d -o.\objects\asm.o -IC:\Users\10175102111\Deskto
+p\ʵ��04\q_1\RTE -Id:\Keil_v5\ARM\PACK\TexasInstruments\MSP432P4xx_DFP\3.2.5\De
+vice\Include -Id:\Keil_v5\ARM\CMSIS\Include --predefine="__UVISION_VERSION SETA
+ 521" --predefine="__MSP432P401R__ SETA 1" --list=.\listings\asm.lst asm.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Reset 00000000
+
+Symbol: Reset
+   Definitions
+      At line 1 in file asm.s
+   Uses
+      None
+Comment: Reset unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+CODE_SEGMET 00000000
+
+Symbol: CODE_SEGMET
+   Definitions
+      At line 4 in file asm.s
+   Uses
+      None
+Comment: CODE_SEGMET unused
+LOOPI 0000000E
+
+Symbol: LOOPI
+   Definitions
+      At line 16 in file asm.s
+   Uses
+      At line 20 in file asm.s
+Comment: LOOPI used once
+Reset_Handler 00000000
+
+Symbol: Reset_Handler
+   Definitions
+      At line 5 in file asm.s
+   Uses
+      At line 3 in file asm.s
+      At line 6 in file asm.s
+
+3 symbols
+337 symbols in table
