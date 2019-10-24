@@ -8,15 +8,16 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
-%\setCJKmainfont[BoldFont=Heiti SC Medium]{Songti SC Light}
-%\setCJKsansfont{Heiti SC}
+
 
 \usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
 \usepackage{tikz,flowchart}
 \usepackage{ctex}
+\usepackage{xeCJK}%中文字体
 \usetikzlibrary{shapes,shapes.geometric,arrows,matrix,calc}
 \usetikzlibrary{circuits.logic}
+
 % \usetikzlibrary{circuits.logic.custom}
 \usetikzlibrary{circuits.logic.IEC}
 \usetikzlibrary{shadows}
@@ -25,6 +26,11 @@
 \usepackage{fancyhdr}
 \usepackage{alphalph}
 \usepackage{indentfirst}
+
+% \setCJKsansfont{黑体}
+\setmainfont{PingFang SC}
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
 
 \newenvironment{sol}
   {\par\vspace{2mm}\noindent{\bf Solution}. }
@@ -101,8 +107,68 @@
 
 \section{实验内容}
 
+\begin{itemize}
+  \item 学习并掌握简单的ARM汇编指令，熟悉其功能及用法，根据题目编写ARM汇编程序；
+  \item 了解奇偶校验码原理及其基本计算方法，并用汇编语言实现；
+  \item 了解海明码原理及其基本计算方法，并用汇编语言实现；
+\end{itemize}
 
 \section{实验原理}
+
+\subsection{奇偶校验码原理}
+
+在原编码上加一个校验位，它的码距等于2，可以检测出一位错误（或奇数位错误），但不能确定出错的位置，也不能够检测偶数位错误，增加的冗余位称为奇偶校验位。
+
+由若干位有效信息和一个二进制位（校验位）组成校验码。校验位的取值（0或1）将使整个校验码中”1”的个数为奇数或偶数，所以有两种可供选择的校验规律。
+
+奇校验码：整个校验码（有效信息位和校验位）中''1''的个数为奇数。
+
+偶校验码：整个校验码（有效信息位和校验位）中''1''的个数为偶数。
+
+举例：
+
+100 1101 （原编码，设最低位为校验位）
+
+1001 1011（奇校验码）
+
+1001 1010（偶校验码）
+
+\subsection{海明码原理}
+
+接收端对这r个偶关系进行校验，即将每个冗余位和与它相关联的信息位进行异或运算，相异或地结果称为校正因子。
+
+如果没有错的话，这r个校正因子都为0；如果有一个错则校正因子不会全为0，根据校正因子的不同取值，可以知道错误发生在码字的哪一个位置上。
+
+\subsubsection{海明码的构造及校验方法}
+
+
+\begin{itemize}
+  \item 根据关系式2r≥k+r+1,计算冗余位的位数；
+  \item 确定信息位与冗余位的位置关系，2i（i=0,1…r）的位置上放冗余位ri，其余位置上Ij(j=1,..k)；
+  \item 找出冗余位与信息位的校验关系；
+  \item 根据校验关系来确定冗余位。
+\end{itemize}
+
+教材给出的 PPT 并没有给出如何构造校验关系的方法，而是针对习题直接给出了校验关系式。这里本着对海明码的好奇，结合网上资料我实现了自动寻找海明码的功能（这样完全摆脱了身边大多数人写的硬编码的弊端，如果更改位数将几乎不用改动代码，而这些人写的代码只能对一种要求实现功能，否则要几乎重写代码）
+
+海明码的中心思想是将 $2^n$ 位置用来作为冗余码，然后假定只有一个位置出错，用冗余码去确定哪个位置出错。换言之，我们需要用 $2^n$ 这些位置来表示唯一的位置。可这不是很简单嘛？使用二进制表达任何一个数，二进制位模式为 1，我们就让对应的冗余码去包含这个位置上的数据。那么如果只有这个数据出错，对应二进制位置上的冗余码就恰好由 0 变为 1，正好就出现了我们想要的——找到出错位置的唯一位置
+
+接下来将描述算法的过程，我个人觉得先看算法的描述对算法的理解有帮助，以存放 4 位数 1101 为例，假设最后的海明码为 $\overline{H_1H_2...H_k}$，原码位 $\overline{l_4l_3l_2l_1}$
+
+
+\begin{enumerate}
+  \item 冗余位个数为3，分别存放在 $H_1,H_2,H_4$
+  \item 剩下的位则存放在 $H_3,H_5,H_6,H_7$
+  \item 3 的位模式 $0011$，可以理解为 $H_{1+2}$
+  \item 5 对应可以理解为 $H_{4+1}$
+  \item 6 对应 $H_{4+2}$
+  \item 7 对应 $H_{4+2+1}$
+  \item 涉及 $H_1$ 的有 $H_3,H_5,H_7$，那么 $r_0 = H_3 \oplus H_5 \oplus H_7 = l_1 \oplus l_2 \oplus l_4$
+  \item 同理 $r_1 = l_4 \oplus l_3 \oplus l_1$
+  \item $r_2 = l_4 \oplus l_3 \oplus l_2$
+\end{enumerate}
+
+推广来说，我们寻找的关系就是用冗余位的下标在加法下凑出信息位的下标，然后对应找出每个冗余位涉及的信息位，这些信息位的异或和就是冗余位
 
 \section{实验步骤}
 
