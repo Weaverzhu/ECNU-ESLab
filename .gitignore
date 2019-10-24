@@ -2,6 +2,8 @@
 _minted-main
 \Objects
 *.axf
+*.bak
+*uvguix*
 
 # Prerequisites
 *.d
