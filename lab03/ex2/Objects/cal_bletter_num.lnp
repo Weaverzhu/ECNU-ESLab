@@ -1,6 +1,0 @@
---cpu Cortex-M4.fp
-".\objects\asm.o"
---strict --scatter ".\Objects\cal_bletter_num.sct"
---summary_stderr --info summarysizes --map --xref --callgraph --symbols
---info sizes --info totals --info unused --info veneers
---list ".\Listings\cal_bletter_num.map" -o .\Objects\cal_bletter_num.axf

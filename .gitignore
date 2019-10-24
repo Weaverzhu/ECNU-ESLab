@@ -1,5 +1,7 @@
 *tar*
 _minted-main
+\Objects
+*.axf
 
 # Prerequisites
 *.d

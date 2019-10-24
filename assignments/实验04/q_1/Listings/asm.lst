@@ -1,0 +1,84 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             Reset,DATA,READONLY
+    2 00000000 12345678        DCD              0X12345678
+    3 00000004 00000000        DCD              Reset_Handler
+    4 00000008                 AREA             CODE_SEGMET,CODE,READONLY
+    5 00000000         Reset_Handler
+                               proc
+    6 00000000                 export           Reset_Handler    [weak]
+    7 00000000         ;MOV R0,#0xA     ;用例1输入值0xA，结果0x15
+    8 00000000 F04F 00BA       MOV              R0,#0xBA    ;用例2输入值0x
+                                                            AB，结果0x174
+    9 00000004         ;MOV R0,#0xCBA   ;用例3输入值0xABC，结果0x1974
+   10 00000004         ;MOV R0,#0x7654  ;用例4输入值0x7654，结果0xECA9
+   11 00000004 4601            MOV              R1,R0       ;R1存储结果
+   12 00000006 F04F 0200       MOV              R2,#0       ;R2存储1的个数
+                                                            
+   13 0000000A F04F 0300       MOV              R3,#0       ;R3作为临时寄�
+                                                            ��器，最多只�
+                                                            �使用R0、R1、R2
+                                                            、R3及xPSR寄存�
+                                                            ��
+   14 0000000E         ;//---------------请在以下空白区域内编写代�
+                       �------------//
+   15 0000000E         
+   16 0000000E         
+   17 0000000E         
+   18 0000000E         
+   19 0000000E         ;//---------------请在以上空白区域内编写代�
+                       �------------//
+   20 0000000E         ;最终结果存入R1
+   21 0000000E BF00            NOP                          ;请直接跳转至
+                                                            此
+   22 00000010                 ENDP
+   23 00000010                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\asm.d -o.\objects\asm.o -I.\RTE\_Target_1 -IC:\Keil_v
+5\ARM\PACK\TexasInstruments\MSP432P4xx_DFP\3.2.5\Device\Include -IC:\Keil_v5\AR
+M\CMSIS\Include --predefine="__UVISION_VERSION SETA 526" --predefine="__MSP432P
+401R__ SETA 1" --list=.\listings\asm.lst asm.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Reset 00000000
+
+Symbol: Reset
+   Definitions
+      At line 1 in file asm.s
+   Uses
+      None
+Comment: Reset unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+CODE_SEGMET 00000000
+
+Symbol: CODE_SEGMET
+   Definitions
+      At line 4 in file asm.s
+   Uses
+      None
+Comment: CODE_SEGMET unused
+Reset_Handler 00000000
+
+Symbol: Reset_Handler
+   Definitions
+      At line 5 in file asm.s
+   Uses
+      At line 3 in file asm.s
+      At line 6 in file asm.s
+
+2 symbols
+336 symbols in table

@@ -1,0 +1,77 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             Reset,DATA,READONLY ;ResetÎªÄ¬È
+                                                            ÏµÄÈë¿ÚµØÖ·
+    2 00000000 12345678        DCD              0X12345678  ;³ÌÐò´Ó0x80000000¿ª
+                                                            Ê¼ÔËÐÐ£¬
+    3 00000004         ;¶øÏµÍ³½«Ö®ºóËÄ¸ö×Ö½ÚÄÚÈÝ·Ö¸øÁË¶ÑÕ»Ö¸Õë
+    4 00000004         ;ËùÒÔ¶¨Òå0x12345678·½±ã¹Û²ì
+    5 00000004 00000000        DCD              Reset_Handler ;¶¨ÒåÒ»¸ö±êºÅ£¬×÷
+                                                            ÎªºóÃæµÄÊä³ö
+    6 00000008                 AREA             CODE_SEGMENT,CODE,READONLY
+    7 00000000         Reset_Handler
+                               proc
+    8 00000000                 export           Reset_Handler [weak]
+    9 00000000         Start
+   10 00000000 F04F 0101       MOV              R1,#1
+   11 00000004 F04F 0202       MOV              R2,#2
+   12 00000008 EB01 0302       ADD              R3,R1,R2
+   13 0000000C                 ENDP
+   14 0000000C                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\asm.d -o.\objects\asm.o -I.\RTE\_Target_1 -IC:\Keil_v
+5\ARM\PACK\TexasInstruments\MSP432P4xx_DFP\3.2.5\Device\Include -IC:\Keil_v5\AR
+M\CMSIS\Include --predefine="__UVISION_VERSION SETA 525" --predefine="__MSP432P
+401R__ SETA 1" --list=.\listings\asm.lst asm.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Reset 00000000
+
+Symbol: Reset
+   Definitions
+      At line 1 in file asm.s
+   Uses
+      None
+Comment: Reset unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+CODE_SEGMENT 00000000
+
+Symbol: CODE_SEGMENT
+   Definitions
+      At line 6 in file asm.s
+   Uses
+      None
+Comment: CODE_SEGMENT unused
+Reset_Handler 00000000
+
+Symbol: Reset_Handler
+   Definitions
+      At line 7 in file asm.s
+   Uses
+      At line 5 in file asm.s
+      At line 8 in file asm.s
+
+Start 00000000
+
+Symbol: Start
+   Definitions
+      At line 9 in file asm.s
+   Uses
+      None
+Comment: Start unused
+3 symbols
+337 symbols in table
