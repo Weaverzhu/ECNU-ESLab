@@ -10,6 +10,8 @@
 \hypersetup{hidelinks}
 
 
+
+
 \usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
 \usepackage{tikz,flowchart}
@@ -31,6 +33,7 @@
 \setmainfont{PingFang SC}
 \setCJKmainfont{PingFang SC}
 \setCJKsansfont{PingFang SC}
+\setmonofont{Monaco}
 
 \newenvironment{sol}
   {\par\vspace{2mm}\noindent{\bf Solution}. }
@@ -94,6 +97,10 @@
 }
 \HRule \\[0.5cm]
 }
+
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newminted{asm}{bgcolor=bg}
+
 \section{实验目的}
 
 \begin{enumerate}
@@ -143,7 +150,7 @@
 
 
 \begin{itemize}
-  \item 根据关系式2r≥k+r+1,计算冗余位的位数；
+  \item 根据关系式 $2^r \ge k+r+1$,计算冗余位的位数；
   \item 确定信息位与冗余位的位置关系，2i（i=0,1…r）的位置上放冗余位ri，其余位置上Ij(j=1,..k)；
   \item 找出冗余位与信息位的校验关系；
   \item 根据校验关系来确定冗余位。
@@ -171,6 +178,69 @@
 推广来说，我们寻找的关系就是用冗余位的下标在加法下凑出信息位的下标，然后对应找出每个冗余位涉及的信息位，这些信息位的异或和就是冗余位
 
 \section{实验步骤}
+
+\subsection{联系1}
+
+相对实验2来说十分简单的练习，只要不断循环右移，获取二进制末尾的一项，然后统计 1 出现的次数就行了
+
+\begin{minted}{asm}
+    AREA Reset,DATA,READONLY
+    DCD 0X12345678
+    DCD   Reset_Handler
+    AREA CODE_SEGMET,CODE,READONLY
+  Reset_Handler  proc
+    export Reset_Handler    [weak]
+      ;MOV R0,#0xA     ;用例1输入值0xA，结果0x15
+      ;MOV R0,#0xBA     ;用例2输入值0xAB，结果0x174
+      ;MOV R0,#0xCBA   ;用例3输入值0xABC，结果0x1974
+      MOV R0,#0x7654  ;用例4输入值0x7654，结果0xECA9
+      MOV R1,R0       ;R1存储结果
+      MOV R2,#0       ;R2存储1的个数
+      MOV R3,#0       ;R3作为临时寄存器，最多只能使用R0、R1、R2、R3及xPSR寄存器
+      ;//---------------请在以下空白区域内编写代码------------//
+
+  LOOPI
+    AND R3,R0,#1
+    ADD R2,R2,R3
+    LSRS R0,R0,#1
+    BGT LOOPI
+    AND R3,R2,#1
+    EOR R1,R3,#1
+      ;//---------------请在以上空白区域内编写代码------------//
+      ;最终结果存入R1
+      NOP         ;请直接跳转至此
+    ENDP
+    END
+\end{minted}
+\subsection{实验2}
+
+主要的精力花费在了完成实验2的代码
+
+首先是不断循环右移，判断给定的数据有多少位 $k$, 然后完成不等式 $2^r+r \le k+1$ 的计算，确定在原代码有 $k$ 位的情况下，冗余位有 $r$ 位，方法是不断使 $r \leftarrow r+1$ 然后判断
+
+\begin{itemize}
+  \item R0: 输入的数
+  \item R1: 临时变量
+  \item R2: 信息位个数 $k$
+  \item R3: 冗余位个数 $r$
+\end{itemize}
+
+\begin{minted}{asm}
+  NUMBER_BIT
+    ADD R2,R2,#1
+      LSRS R1,R1,#1
+      BGT NUMBER_BIT
+    MOV R3,#0 ; R3 = r, R2 = k, 2^r-r-1 >= K, R4 for tmp, this loop is to determine r
+  LOOPRK
+    ADD R3,R3,#1
+    MOV R4, #1
+    LSL R4, R4, R3
+    SUB R4,R4,R3
+    SUB R4,R4,#1
+    SUBS R4,R4,R2
+    BLT LOOPRK
+\end{minted}
+
 
 \section{调试过程、结果与分析}
 
