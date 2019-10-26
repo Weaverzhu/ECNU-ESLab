@@ -74,28 +74,27 @@
 \newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
 
 {\center {\huge \bfseries \LARGE{华东师范大学计算机科学技术系上机实验报告}} \\ [0.8cm]
-
-\small{
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{课程名称：}计算机组成与结构实践\\
-    \textbf{指导教师：}金健\\
-    \textbf{上机实践名称：} TODO\\
-    \textbf{实践编号：}实验 1
-  \end{minipage}
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{年级：}17 级\\
-    \textbf{姓名：}朱桐\\
-    \textbf{学号：}10175102111\\
-    \textbf{组号：}A
-  \end{minipage} 
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{上机实践成绩：} \\
-    \textbf{创新实践成绩：} \\
-    \textbf{上机实践日期：}2019/09/20\\
-    \textbf{上机实践时间：}2 学时\\
-  \end{minipage}
-}
-\HRule \\[0.5cm]
+		
+	\small{
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{课程名称：} 嵌入式系统\\
+			\textbf{指导教师：} 沈建华\\
+			\textbf{上机实践名称：} 汇编语言程序设计\\
+			\textbf{实践编号：}实验4
+		\end{minipage}
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{年级：}17 级\\
+			\textbf{姓名：}朱桐\\
+			\textbf{学号：}10175102111\\
+		\end{minipage} 
+		\begin{minipage}[t]{.32\linewidth}
+			\textbf{上机实践成绩：} \\
+			\textbf{创新实践成绩：} \\
+			\textbf{上机实践日期：}2019/10/23\\
+			\textbf{上机实践时间：}2 学时\\
+		\end{minipage}
+	}
+	\HRule \\[0.5cm]
 }
 
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
@@ -260,12 +259,14 @@ LOOPRK
   MOV R6, #0 ;R6 stands for the current bit in original int
 DUMP
   CMP R5,R4
-  LSLEQ R4,R4,#1 ; should prepare for the next parity code, instead of setting information bit
+  LSLEQ R4,R4,#1 ; should prepare for the next parity code,
+  ; instead of setting information bit
   MOV R7,#1
   LSL R7,R7,R6 ; R7 = 2^{R6} & R0, get the R6-th bit in original int
   ANDS R7,R7,R0
   MOV R7,#0
-  MOVNE R7,#1 ; R6 = 2^{R5-1}, prepare to set the R5-th bit in hamming code
+  MOVNE R7,#1 ; R6 = 2^{R5-1}, prepare to set the R5-th bit 
+  ;in hamming code
   SUB R5,R5,#1
   LSL R7,R7,R5
   ADD R5,R5,#1
@@ -315,18 +316,21 @@ CONT
   MOV R6, #0 ;R5 stands for the current bit in original int
 DUMP
   CMP R5,R4
-  LSLEQ R4,R4,#1 ; should prepare for the next parity code, instead of setting information bit
+  LSLEQ R4,R4,#1 ; should prepare for the next parity code, 
+  ;instead of setting information bit
   MOV R7,#1
   LSL R7,R7,R6 ; R7 = 2^{R6} & R0, get the R6-th bit in original int
   ANDS R7,R7,R0
   MOV R7,#0
-  MOVNE R7,#1 ; R6 = 2^{R5-1}, prepare to set the R5-th bit in hamming code
+  MOVNE R7,#1 ; R6 = 2^{R5-1}, prepare to set the R5-th bit 
+  ;in hamming code
   SUB R5,R5,#1
   LSL R7,R7,R5
   ADD R5,R5,#1
   CMP R4,R5,LSL #1
   BEQ CONT
-  EOR R1,R1,R7 ; copy the $R6-th bit in original int to the $R5-th bit in hamming-code
+  EOR R1,R1,R7 ; copy the $R6-th bit in original int to the 
+  ;$R5-th bit in hamming-code
   ADD R6,R6,#1
   CBZ R7,CONT
   MOV R8,R5
@@ -426,16 +430,263 @@ CONTR
 
 \section{调试过程、结果与分析}
 
-这个程序只要满足海明码位数小于31位（通用寄存器能存的下），都可以完成功能。我们令输入数据为, 0xD, 0xAB, 0xABC
+这个程序只要满足海明码位数小于31位（通用寄存器能存的下），都可以完成功能。我们令输入数据为, 0xD, 0xAB, 0xABC，这里给出输入为 0xAB （按照实验要求）的运行截图。实际上，对于三种输入都能得出正确的结果。
 
-\subsection{输入为 0xD}
-
-
+\subsection{输入为 0xAB}
 
 
+计算位数，相关寄存器 R2,R3，如图 \ref{fig:5}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\linewidth]{1.PNG}
+  \caption{计算位数}
+  \label{fig:5}
+\end{figure}
+
+计算海明码并且更改R0，相关寄存器 R0,R1，如图 \ref{fig:6}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\linewidth]{2.PNG}
+  \caption{计算冗余码更改}
+  \label{fig:6}
+\end{figure}
+
+计算海明码的第七位，也就是数据的第四位（从1开始计数）出现错误，如图 \ref{fig:7}
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\linewidth]{3.png}
+  \caption{计算海明码的第七位出错}
+  \label{fig:7}
+\end{figure}
+
+将海明码转换回原编码，并且纠错，得到最开始的答案，如图 \ref{fig:8}
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\linewidth]{4.png}
+  \caption{恢复原来 R0}
+  \label{fig:8}
+\end{figure}
 
 \section{总结}
 
+第二个练习的代码最后写得又丑又长，其实主要还是因为没有提前规划好设计模式，仍有一些可以改进的空间
+
+\begin{enumerate}
+  \item 设计二进制转换，比如循环 $x$ 要获取 $2^x$，可以令 $R0=1,R0=R0+R0$ 而不是再 $R0=0,R0=R0+1$ 然后在用左移获取 $2^x$ 的值
+  \item 有两次计算海明码的过程，这个过程用函数调用实现显然会更加优雅
+  \item 临时寄存器大乱炖，这个可以通过提前规划解决
+  \item 部分功能有更少的代码可以实现
+  \item ...
+\end{enumerate}
+
+
+
 \section{附件}
+
+完整代码如下
+
+第一个练习
+
+\begin{asmcode}
+  AREA Reset,DATA,READONLY
+  DCD 0X12345678
+  DCD   Reset_Handler
+  AREA CODE_SEGMET,CODE,READONLY
+Reset_Handler  proc
+  export Reset_Handler    [weak]
+    ;MOV R0,#0xA     ;用例1输入值0xA，结果0x15
+    ;MOV R0,#0xBA     ;用例2输入值0xAB，结果0x174
+    ;MOV R0,#0xCBA   ;用例3输入值0xABC，结果0x1974
+    MOV R0,#0x7654  ;用例4输入值0x7654，结果0xECA9
+    MOV R1,R0       ;R1存储结果
+    MOV R2,#0       ;R2存储1的个数
+    MOV R3,#0       ;R3作为临时寄存器，最多只能使用R0、R1、R2、R3及xPSR寄存器
+    ;//---------------请在以下空白区域内编写代码------------//
+
+LOOPI
+  AND R3,R0,#1
+  ADD R2,R2,R3
+  LSRS R0,R0,#1
+  BGT LOOPI
+  AND R3,R2,#1
+  EOR R1,R3,#1
+    ;//---------------请在以上空白区域内编写代码------------//
+    ;最终结果存入R1
+    NOP         ;请直接跳转至此
+  ENDP
+  END
+\end{asmcode}
+
+第二个练习
+
+\begin{asmcode}
+	AREA Reset,DATA,READONLY
+	DCD 0X12345678
+	DCD   Reset_Handler
+	AREA CODE_SEGMET,CODE,READONLY
+Reset_Handler  proc
+	export Reset_Handler    [weak]
+    MOV R0,0xABC ; input data, you can input whatever int you want
+    MOV R1,R0
+    MOV R2,#0 ; store the number of bit of the input number, this loop is to determine k
+NUMBER_BIT
+	ADD R2,R2,#1
+    LSRS R1,R1,#1
+    BGT NUMBER_BIT
+	MOV R3,#0 ; R3 = r, R2 = k, 2^r-r-1 >= K, R4 for tmp, this loop is to determine r
+LOOPRK
+	ADD R3,R3,#1
+	MOV R4, #1
+	LSL R4, R4, R3
+	SUB R4,R4,R3
+	SUB R4,R4,#1
+	SUBS R4,R4,R2
+	BLT LOOPRK
+
+	; dump k bit int to k+r bit Hamming Code in R1, R7,R8,R9,R10 for tmp
+	MOV R1,#0
+	MOV R4, #1 ;R4 stands for the next 2^n
+	MOV R5, #1 ;R5 stands for the current bit in hamming code
+	MOV R6, #0 ;R5 stands for the current bit in original int
+DUMP
+	CMP R5,R4
+	LSLEQ R4,R4,#1 ; should prepare for the next parity code, instead of setting information bit
+	MOV R7,#1
+	LSL R7,R7,R6 ; R7 = 2^{R6} & R0, get the R6-th bit in original int
+	ANDS R7,R7,R0
+	MOV R7,#0
+	MOVNE R7,#1 ; R6 = 2^{R5-1}, prepare to set the R5-th bit in hamming code
+	SUB R5,R5,#1
+	LSL R7,R7,R5
+	ADD R5,R5,#1
+	CMP R4,R5,LSL #1
+	BEQ CONT
+	EOR R1,R1,R7 ; copy the $R6-th bit in original int to the $R5-th bit in hamming-code
+	ADD R6,R6,#1
+	CBZ R7,CONT
+	MOV R8,R5
+	MOV R10,#0
+LOOP
+	ANDS R7,R8,#1
+	MOV R9,#0
+	MOVNE R9,#1
+	LSLS R9,R9,R10
+	MOV R7,#1
+	SUBNE R9,R9,#1
+	LSLNE R9,R7,R9
+	EOR R1,R1,R9
+	
+	LSRS R8,R8,#1
+	ADD R10,R10,#1
+	BNE LOOP
+CONT
+	ADD R5,R5,#1
+	CMP R6,R2
+	BLT DUMP
+	
+	
+	MOV R11,R1 ; backup the parity code
+	MOV R8,#1
+	EOR R0,R8,LSL #3; change the 3-th bit of R0
+	
+	; same again, calc the parity code for new hamming code
+	; dump k bit int to k+r bit Hamming Code in R1, R7,R8,R9,R10 for tmp
+	MOV R1,#0
+	MOV R4, #1 ;R4 stands for the next 2^n
+	MOV R5, #1 ;R5 stands for the current bit in hamming code
+	MOV R6, #0 ;R5 stands for the current bit in original int
+DUMP2
+	CMP R5,R4
+	LSLEQ R4,R4,#1 ; should prepare for the next parity code, instead of setting information bit
+	MOV R7,#1
+	LSL R7,R7,R6 ; R7 = 2^{R6} & R0, get the R6-th bit in original int
+	ANDS R7,R7,R0
+	MOV R7,#0
+	MOVNE R7,#1 ; R6 = 2^{R5-1}, prepare to set the R5-th bit in hamming code
+	SUB R5,R5,#1
+	LSL R7,R7,R5
+	ADD R5,R5,#1
+	CMP R4,R5,LSL #1
+	BEQ CONT2
+	EOR R1,R1,R7 ; copy the $R6-th bit in original int to the $R5-th bit in hamming-code
+	ADD R6,R6,#1
+	CBZ R7,CONT2
+	MOV R8,R5
+	MOV R10,#0
+LOOP2
+	ANDS R7,R8,#1
+	MOV R9,#0
+	MOVNE R9,#1
+	LSLS R9,R9,R10
+	MOV R7,#1
+	SUBNE R9,R9,#1
+	LSLNE R9,R7,R9
+	EOR R1,R1,R9
+	
+	LSRS R8,R8,#1
+	ADD R10,R10,#1
+	BNE LOOP2
+CONT2
+	ADD R5,R5,#1
+	CMP R6,R2
+	BLT DUMP2
+
+	MOV R4,#0; R4 store the position of the error bit
+	MOV R5,#0
+FLOOP
+	MOV R6,#1
+	LSL R6,R6,R5
+	MOV R9,#1
+	SUB R6,R6,#1
+	LSL R6,R9,R6
+	AND R7,R1,R6
+	AND R8,R11,R6
+	EORS R6,R7,R8
+	MOV R9,#1
+	LSL R9,R9,R5
+	ADDNE R4,R4,R9
+	
+	ADD R5,R5,#1
+	CMP R5,R3
+	BLT FLOOP
+
+	MOV R5,#1
+	SUB R4,R4,#1
+	LSL R4,R5,R4
+	EOR R1,R1,R4 ; now the bit on the hamming code should be corrected
+	
+	MOV R0,#0
+	MOV R4, #1 ;R4 stands for the next 2^n
+	MOV R5, #1 ;R5 stands for the current bit in hamming code
+	MOV R6, #0 ;R5 stands for the current bit in original int
+DUMPR ; convert hamming code to original code in R0
+	CMP R5,R4
+	LSLEQ R4,R4,#1 ; parity code
+	BEQ CONTR
+	MOV R7,#1
+	SUB R5,R5,#1
+	LSL R7,R7,R5
+	ADD R5,R5,#1
+	ANDS R7,R7,R1
+	MOV R8,#0
+	MOVNE R8,#1
+	LSL R8,R8,R6
+	EOR R0,R0,R8
+	ADD R6,R6,#1
+CONTR
+	ADD R5,R5,#1
+	CMP R6,R2
+	BLT DUMPR
+; now R0 is restored!
+    NOP
+	ENDP
+	END  
+\end{asmcode}
 
 \end{document}
