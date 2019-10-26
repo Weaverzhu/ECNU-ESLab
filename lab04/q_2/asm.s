@@ -4,7 +4,7 @@
 	AREA CODE_SEGMET,CODE,READONLY
 Reset_Handler  proc
 	export Reset_Handler    [weak]
-    MOV R0,0xAB ; input data, you can input whatever int you want
+    MOV R0,0xABC ; input data, you can input whatever int you want
     MOV R1,R0
     MOV R2,#0 ; store the number of bit of the input number, this loop is to determine k
 NUMBER_BIT
@@ -114,18 +114,48 @@ CONT2
 FLOOP
 	MOV R6,#1
 	LSL R6,R6,R5
+	MOV R9,#1
+	SUB R6,R6,#1
+	LSL R6,R9,R6
 	AND R7,R1,R6
 	AND R8,R11,R6
 	EORS R6,R7,R8
-	ADDNE R4,R4,R5
-	CMP R5,R3
+	MOV R9,#1
+	LSL R9,R9,R5
+	ADDNE R4,R4,R9
+	
 	ADD R5,R5,#1
+	CMP R5,R3
 	BLT FLOOP
 
 	MOV R5,#1
+	SUB R4,R4,#1
 	LSL R4,R5,R4
-	EOR R0,R0,R4 ; now R0 should be corrected
-
+	EOR R1,R1,R4 ; now the bit on the hamming code should be corrected
+	
+	MOV R0,#0
+	MOV R4, #1 ;R4 stands for the next 2^n
+	MOV R5, #1 ;R5 stands for the current bit in hamming code
+	MOV R6, #0 ;R5 stands for the current bit in original int
+DUMPR ; convert hamming code to original code in R0
+	CMP R5,R4
+	LSLEQ R4,R4,#1 ; parity code
+	BEQ CONTR
+	MOV R7,#1
+	SUB R5,R5,#1
+	LSL R7,R7,R5
+	ADD R5,R5,#1
+	ANDS R7,R7,R1
+	MOV R8,#0
+	MOVNE R8,#1
+	LSL R8,R8,R6
+	EOR R0,R0,R8
+	ADD R6,R6,#1
+CONTR
+	ADD R5,R5,#1
+	CMP R6,R2
+	BLT DUMPR
+; now R0 is restored!
     NOP
 	ENDP
 	END
