@@ -4,7 +4,7 @@
 	AREA CODE_SEGMET,CODE,READONLY
 Reset_Handler  proc
 	export Reset_Handler    [weak]
-    MOV R0,0xABC ; input data, you can input whatever int you want
+    MOV R0,0xAB ; input data, you can input whatever int you want
     MOV R1,R0
     MOV R2,#0 ; store the number of bit of the input number, this loop is to determine k
 NUMBER_BIT
