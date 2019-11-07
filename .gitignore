@@ -4,6 +4,8 @@ _minted-main
 *.axf
 *.bak
 *uvguix*
+*.tar
+\.vscode
 
 # Prerequisites
 *.d
