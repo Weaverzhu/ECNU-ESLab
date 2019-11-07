@@ -1,0 +1,9 @@
+--cpu Cortex-M4.fp
+".\objects\system_msp432p401r.o"
+".\objects\startup_msp432p401r_uvision.o"
+"..\source\ti\devices\msp432p4xx\driverlib\keil\msp432p4xx_driverlib.lib"
+".\objects\main.o"
+--strict --scatter ".\Objects\Lab0502_Reset_10175102111.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\Lab0502_Reset_10175102111.map" -o .\Objects\Lab0502_Reset_10175102111.axf

@@ -5,6 +5,7 @@ _minted-main
 *.bak
 *uvguix*
 *.tar
+*.ppt
 \.vscode
 
 # Prerequisites

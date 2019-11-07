@@ -1,0 +1,9 @@
+--cpu Cortex-M4.fp
+".\objects\main.o"
+".\objects\startup_msp432p401r_uvision.o"
+".\objects\system_msp432p401r.o"
+"..\source\ti\devices\msp432p4xx\driverlib\keil\msp432p4xx_driverlib.lib"
+--strict --scatter ".\Objects\blinkLED_msp432p401r.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\blinkLED_msp432p401r.map" -o .\Objects\blinkLED_msp432p401r.axf
