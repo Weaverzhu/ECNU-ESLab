@@ -41,9 +41,6 @@
 \numberwithin{equation}{section}
 \numberwithin{figure}{section}
 
-\usepackage{karnaugh}
-\usepackage{circuitikz}
-
 
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
@@ -102,13 +99,100 @@
 
 \section{实验设备}
 
+\begin{enumerate}
+  \item 软件Keil5(keil提供了软件仿真功能)；
+  \item MSP432 P401R开发板
+\end{enumerate}
 
 \section{实验内容}
+
+\begin{enumerate}
+  \item 进一步熟悉Keil实验环境，以及在连接开发板时Keil的相关配置
+  \item 通过实验深入了解系统复位控制，包括外部复位、看门狗复位
+  \item 通过实验掌握时钟配置
+\end{enumerate}
 
 
 \section{实验原理}
 
+\subsection{外部复位}
+
+外部复位即RESET 引脚低电平，当复位引脚RESET作为开漏输入时，在复位引脚上宽度最小为500ns 的低电平脉冲即可产生一个外部复位。复位引脚RESET作为开漏输入时用于对外部设备进行复位。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{1.png}
+  \caption{}
+  \label{}
+\end{figure}
+
+\subsection{看门狗复位}
+
+看门狗定时器（Watch Dog Timer，WDT）与MCU 构成一个复位电路，这个电路一般有一个输入端和一个输出端，输入端用于“喂狗”，输出端接到MCU 的复位端。MCU正常工作的时候，每隔一端时间输出一个信号到“喂狗”端，使得看门狗计数器清零，如果超过规定的时间不喂狗，WDT 就会溢出并输出一个复位信号到MCU，使得MCU 复位，以防止MCU 死机。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{2.png}
+  \caption{看门狗复位}
+  \label{}
+\end{figure}
+
+
+\subsection{MCLK 时钟配置}
+
+MCLK为主时钟，用于CPU和片内外设。时钟系统模块的框图如下图 \ref{fig:3} 所示
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{3.png}
+  \caption{时钟系统模块}
+  \label{fig:3}
+\end{figure}
+
+
+主程序流程如图 \ref{fig:4}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.3\textwidth]{4.png}
+  \caption{主程序流程图}
+  \label{fig:4}
+\end{figure}
+
+
+P1.1中断流程如图 \ref{fig:5}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.3\textwidth]{5.png}
+  \caption{P1.1中断流程图}
+  \label{fig:5}
+\end{figure}
+
 \section{实验步骤}
+
+\subsection{外部复位实验}
+
+\begin{itemize}
+  \item 使用keil 5新建工程，工程名的格式为: Lab0502\_Reset\_10175102111.uvprojx
+  \item 控制LED1先长亮灭一次，再循环短亮灭。其中，第一次长亮灭要求灯亮时长定义为空循环600000次，即MyDelay(60)，关于MyDelay函数的定义如下图；灯灭时长定义为空循环300000次。循环亮灭中，灯亮时长定义为空循环100000次，灯灭时长定义为空循环500000次。
+  \item 按压开发板Reset（S3）按钮，观察实验现象
+\end{itemize}
+
+\subsection{看门狗复位实验}
+
+\begin{itemize}
+  \item 开发板的LED2（绿灯）先闪烁两次，然后LED1（红灯）周期性地闪烁；当按压键S1(P1.1)时，请按照斐波那契数列(1,1,2,3,5,8..)增大count值，count值用于延时函数MyDelay，即随着count值变化，LED1的闪烁周期变化；
+  \item 不断按压键S1(P1.1)，观察LED1（红灯）闪烁变化情况；
+  \item 根据以上要求将工程05\_03补充完整，请思考此工程的功能实现有哪些可改进的地方。
+\end{itemize}
+
+\subsection{MCLK 时钟实验}
+
+将工程05\_04编译烧写至开发板后，可以观察到LED2的绿灯以较快的频率闪烁；每次按 S1键后，会改变时钟分频，LED2的绿灯闪烁频率会逐步减慢；连续按压S1键8次后， LED2的绿灯又会以起始频率闪烁。
+
+工程05\_04中使用DCO时钟源，LED2的绿灯闪烁频率是周期性地由快变慢，周期为8。请更换时钟源为MODCLK，LED2的绿灯闪烁频率改为周期性地由慢变快，周期为6，要求能明显观察到闪烁快慢变化。
+
 
 \section{调试过程、结果与分析}
 
