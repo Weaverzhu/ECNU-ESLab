@@ -8,15 +8,18 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
-%\setCJKmainfont[BoldFont=Heiti SC Medium]{Songti SC Light}
-%\setCJKsansfont{Heiti SC}
+
+
+
 
 \usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
 \usepackage{tikz,flowchart}
 \usepackage{ctex}
+\usepackage{xeCJK}%中文字体
 \usetikzlibrary{shapes,shapes.geometric,arrows,matrix,calc}
 \usetikzlibrary{circuits.logic}
+
 % \usetikzlibrary{circuits.logic.custom}
 \usetikzlibrary{circuits.logic.IEC}
 \usetikzlibrary{shadows}
@@ -26,10 +29,17 @@
 \usepackage{alphalph}
 \usepackage{indentfirst}
 
+% \setCJKsansfont{黑体}
+\setmainfont{PingFang SC}
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setmonofont{Monaco}
+
 \newenvironment{sol}
   {\par\vspace{2mm}\noindent{\bf Solution}. }
 
 \lstset{escapeinside=``, breaklines=true, frame=none, extendedchars=false, basicstyle=\ttfamily, showstringspaces=false}
+
 
 
 \setlength{\parindent}{2em}
@@ -58,6 +68,10 @@
   \vspace{6mm}}
 \makeatother
 
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newminted{asm}{bgcolor=bg}
+\newminted{c}{bgcolor=bg}
+
 \newcommand{\HRule}{\rule{\linewidth}{1mm}}
 \newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
 
@@ -66,28 +80,25 @@
 \small{
   \begin{minipage}[t]{.32\linewidth}
     \textbf{课程名称：}嵌入式系统\\
-    \textbf{指导教师：}金健\\
-    \textbf{上机实践名称：} TODO\\
-    \textbf{实践编号：}实验 1
+    \textbf{指导教师：}沈建华\\
+    \textbf{上机实践名称：} 系统复位与时钟配置\\
+    \textbf{实践编号：}实验5
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \textbf{年级：}17 级\\
     \textbf{姓名：}朱桐\\
     \textbf{学号：}10175102111\\
-    \textbf{组号：}A
   \end{minipage} 
   \begin{minipage}[t]{.32\linewidth}
     \textbf{上机实践成绩：} \\
     \textbf{创新实践成绩：} \\
-    \textbf{上机实践日期：}2019/09/20\\
+    \textbf{上机实践日期：}2019/10/30\\
     \textbf{上机实践时间：}2 学时\\
   \end{minipage}
 }
 \HRule \\[0.5cm]
 }
 
-\definecolor{bg}{rgb}{0.95,0.95,0.95}
-\newminted{asm}{bgcolor=bg}
 
 \section{实验目的}
 
@@ -179,6 +190,7 @@ P1.1中断流程如图 \ref{fig:5}
   \item 按压开发板Reset（S3）按钮，观察实验现象
 \end{itemize}
 
+
 \subsection{看门狗复位实验}
 
 \begin{itemize}
@@ -196,7 +208,174 @@ P1.1中断流程如图 \ref{fig:5}
 
 \section{调试过程、结果与分析}
 
+\subsection{外部复位实验}
+
+
+新建工程时，我们需要导入一些外部代码如图 \ref{fig:6}, \ref{fig:7}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{6.png}
+  \caption{调试器配置}
+  \label{fig:6}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.3\textwidth]{7.png}
+  \caption{项目信息配置}
+  \label{fig:7}
+\end{figure}
+
+
+
+\begin{ccode}
+  GPIO_toggleOutputOnPin(GPIO_PORT_P1,GPIO_PIN0);
+    MyDelay(60);
+    GPIO_toggleOutputOnPin(GPIO_PORT_P1,GPIO_PIN0);
+    MyDelay(30);
+
+  while (1) {
+    GPIO_toggleOutputOnPin(GPIO_PORT_P1,GPIO_PIN0);
+    MyDelay(10);
+    GPIO_toggleOutputOnPin(GPIO_PORT_P1,GPIO_PIN0);
+    MyDelay(50);
+  }
+\end{ccode}
+
+其中 GPIO\_toggleOutputOnPin(GPIO\_PORT\_P1,GPIO\_PIN0); 可以改变 LED1 的暗灭状态，我们就用这个函数控制亮灭
+
+\subsection{看门狗复位实验}
+
+定义我们需要的变量
+
+\begin{ccode}
+  //*-----------在此下区域可定义变量-----------*//
+    unsigned i=4;
+    unsigned int count=1, fn, fn1 = 1, fn2 = 0;
+  //*-----------在此上区域可定义变量-----------*//  
+\end{ccode}
+
+计算斐波那契数列
+
+\begin{ccode}
+  //*-----------在此下区域修改-----------*//
+  //检测到P1.1按键被按下
+  if (GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN1)==GPIO_INPUT_PIN_LOW)
+  {
+      count = fn = fn1 + fn2;
+      fn2 = fn1;
+      fn1 = fn;
+  }
+  //*-----------在此上区域修改-----------*//
+\end{ccode}
+
+实际上不会因为斐波那契数列的无限增长而停止闪烁，因为会存在看门狗复位。程序中设置超过两秒会清零
+
+\begin{ccode}
+  //设置看门狗超时时间为2s，即2s内看门狗计数器未清理零则复位LaunchPad，
+  // t=WDT/SMCLK=32K/16K=2
+    MAP_WDT_A_initWatchdogTimer(WDT_A_CLOCKSOURCE_SMCLK,
+    WDT_A_CLOCKDIVIDER_32K);
+\end{ccode}
+
+当周期太长的时候，程序控制流会停在 MyDelay 函数而不会到达下面的 MAP\_WDT\_A\_clearTimer() 函数，从而引发看门狗复位
+
+\begin{ccode}
+  while(1)
+  {
+    //*-----------在此下区域修改-----------*//
+    //检测到P1.1按键被按下
+    if (GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN1)==GPIO_INPUT_PIN_LOW)
+    {
+      count = fn = fn1 + fn2;
+      fn2 = fn1;
+      fn1 = fn;
+    }
+    //*-----------在此上区域修改-----------*//
+    
+    GPIO_toggleOutputOnPin(GPIO_PORT_P1,GPIO_PIN0); //翻转P1.0电平，
+    // 翻转红色LED1电平
+    MAP_WDT_A_clearTimer(); //看门狗计数清零
+    MyDelay(count);
+  }
+\end{ccode}
+
+
+\subsubsection{改进}
+
+实验要求并没有给定改进的目标，为了检查效果改进代码并未添加在工程文件。这里假定希望能实现更长周期的斐波那契数列，那么我们需要停用看门狗计数器
+
+\begin{ccode}
+  /* 停用看门狗定时器 */
+  MAP_WDT_A_holdTimer();
+\end{ccode}
+
+使用更高的数据类型记录斐波那契数列
+
+\begin{ccode}
+  
+  //延时函数
+  void MyDelay(unsigned long long count)
+  {
+    volatile unsigned long long i;
+    for(i=1000*count; i>0; i--);
+    return ;
+  }
+  ////.....
+  unsigned long long fn, fn1=1, fn2=0;
+\end{ccode}
+
+\subsection{MCLK 时钟实验}
+
+改变时钟源
+
+\begin{ccode}
+  /* 配置时钟频率MCLK=3M（主时钟频率） DCO默认频率3M*/   
+  MAP_CS_initClockSignal(CS_MCLK, CS_MODOSC_SELECT, CS_CLOCK_DIVIDER_128); 
+\end{ccode}
+
+改变周期为6
+
+\begin{ccode}
+  count++;
+  count%=6;
+\end{ccode}
+
+改编为由快到慢需要两个地方，一个是初始速度，一个是每个 count 数值对应的速度
+
+\begin{ccode}
+  /* 配置时钟频率MCLK=3M（主时钟频率） DCO默认频率3M*/   
+  MAP_CS_initClockSignal(CS_MCLK, CS_MODOSC_SELECT, CS_CLOCK_DIVIDER_128); 
+  //////...
+  switch(count)
+  {
+    case 0:
+      tmp=CS_CLOCK_DIVIDER_128; //不分频
+      break;
+    case 1:
+      tmp=CS_CLOCK_DIVIDER_64; //2分频,以下类推
+      break;
+    case 2:
+      tmp=CS_CLOCK_DIVIDER_32;
+      break;
+    case 3:
+      tmp=CS_CLOCK_DIVIDER_16;
+      break;
+    case 4:
+      tmp=CS_CLOCK_DIVIDER_8;
+      break;
+    case 5:
+      tmp=CS_CLOCK_DIVIDER_4;
+      break;           
+    default:
+      return ;
+  }
+\end{ccode}
+
 \section{总结}
+
+http://www.ti.com/ 有很多额外的参考资料，对 msp432p401r 开发大有帮助
 
 \section{附件}
 

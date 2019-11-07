@@ -8,15 +8,18 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
-%\setCJKmainfont[BoldFont=Heiti SC Medium]{Songti SC Light}
-%\setCJKsansfont{Heiti SC}
+
+
+
 
 \usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
 \usepackage{tikz,flowchart}
 \usepackage{ctex}
+\usepackage{xeCJK}%中文字体
 \usetikzlibrary{shapes,shapes.geometric,arrows,matrix,calc}
 \usetikzlibrary{circuits.logic}
+
 % \usetikzlibrary{circuits.logic.custom}
 \usetikzlibrary{circuits.logic.IEC}
 \usetikzlibrary{shadows}
@@ -25,6 +28,12 @@
 \usepackage{fancyhdr}
 \usepackage{alphalph}
 \usepackage{indentfirst}
+
+% \setCJKsansfont{黑体}
+\setmainfont{PingFang SC}
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setmonofont{Monaco}
 
 \newenvironment{sol}
   {\par\vspace{2mm}\noindent{\bf Solution}. }
@@ -40,9 +49,6 @@
 
 \numberwithin{equation}{section}
 \numberwithin{figure}{section}
-
-\usepackage{karnaugh}
-\usepackage{circuitikz}
 
 
 \setcounter{secnumdepth}{3}
