@@ -6,11 +6,11 @@
 #include <stdlib.h>
 
 #define BANKl_S29 (0x3D000)
-#define strNum 11
-#define BANK_SIZE 4096
+#define strNum 0x11
+#define SIZE 4096
 #define COUNT (1200000)
 
-unsigned char array[BANK_SIZE];
+unsigned char array[SIZE];
 int button;
 int time;
 
@@ -20,7 +20,7 @@ int main(void)
     volatile int pos;
 
     // fill the bank with strNum
-    memset(array, strNum, BANK_SIZE);
+    memset(array, strNum, SIZE);
 
     // stop the watch dog
     MAP_WDT_A_holdTimer();
@@ -92,7 +92,7 @@ int main(void)
                 // turn off the other lights
                 MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
                 MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
-                if (!MAP_FlashCtl_programMemory(array, (void *)BANKl_S29, BANK_SIZE))
+                if (!MAP_FlashCtl_programMemory(array, (void *)BANKl_S29, SIZE))
                 {
                     // turn off LED2 G, turn on LED1 R
                     MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
@@ -108,7 +108,7 @@ int main(void)
             case 3:
 
                 // randomly select a position in BANK1_S29
-                pos = rand() % BANK_SIZE;
+                pos = rand() % SIZE;
                 S29 = *((unsigned char *)(BANKl_S29 + pos));
 
                 // if the char is what we want

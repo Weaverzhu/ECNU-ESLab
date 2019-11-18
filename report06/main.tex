@@ -74,10 +74,10 @@
 
 \small{
   \begin{minipage}[t]{.32\linewidth}
-    \textbf{课程名称：}计算机组成与结构实践\\
-    \textbf{指导教师：}金健\\
-    \textbf{上机实践名称：} TODO\\
-    \textbf{实践编号：}实验 1
+    \textbf{课程名称：}嵌入式系统原理与实践\\
+    \textbf{指导教师：}沈建华\\
+    \textbf{上机实践名称：} 存储器映射与读写\\
+    \textbf{实践编号：}实验 6
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \textbf{年级：}17 级\\
@@ -88,7 +88,7 @@
   \begin{minipage}[t]{.32\linewidth}
     \textbf{上机实践成绩：} \\
     \textbf{创新实践成绩：} \\
-    \textbf{上机实践日期：}2019/09/20\\
+    \textbf{上机实践日期：}2019/11/12\\
     \textbf{上机实践时间：}2 学时\\
   \end{minipage}
 }
@@ -97,32 +97,297 @@
 
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \newminted{asm}{bgcolor=bg}
+\newminted{c}{bgcolor=bg}
 
 \section{实验目的}
 
 \begin{enumerate}
-    \item 了解两种控制方式：“手动”和“微控制”
-    \item 了解两种实验方式：“搭接”和“在线”
-    \item 理解并学会设置手动搭接实验方式
-    \item 熟悉与了解准双向 I/O 口的构成原理
-    \item 掌握准双向 I/O 口的输入/输出特性的运用
-    \item 熟悉通用寄存器的数据通路
-    \item 掌握通用寄存器的构成和运用
+    \item 掌握MSP432P401R的存储器映射
+    \item 掌握NOR Flash的读写操作
 \end{enumerate}
 
 \section{实验设备}
 
+\begin{enumerate}
+  \item 软件Keil5；
+  \item MSP432P401R开发板
+\end{enumerate}
 
 \section{实验内容}
 
+\begin{enumerate}
+  \item 通过实验验证存储器的映射分布
+  \item 学习Flash的擦除、写入和读取操作
+  \item 完成课堂练习：烧录指示灯的实现
+\end{enumerate}
 
 \section{实验原理}
 
+\subsection{存储器映射}
+
+
+在嵌入式处理器内，集成了多种类型的Memory，通常我们称同一类型的Memory为一个Memory Block。一般情况下，处理器设计者会为每一个memory block分配一个数值连续的自然数集合作为该block的地址编码。这种自然数集合与block的对应关系就是Memory Map（存储器映射、内存映射），有时也叫地址映射（Address Map）。
+
+本实验中我们主要使用Block0，Block0 主要用于设计片内的 FLASH。 程序放置在FLASH中，也就是0x0000\_0000~0x0040\_0000区域，如图 \ref{fig:1} 所示。
+
+\subsection{Flash的擦除和写入}
+
+Flash存储器区域主要分为:主存储器和信息存储器。主存储器和信息存储器均被等分为2个BANK：BANK0和BANK1。当程序在BANK0进行写入或擦除时，同时可以在BANK1进行读取或执行操作。
+
+主存储器大小为256KB，由64个扇区组成，每个扇区大小为4KB，最小擦除粒度为4KB(1扇区)；主存储器由两个独立的BANK组成：BANK0和BANK1，每个BANK为128KB，各有32个扇区。
+
+信息存储器大小为16KB，由4个扇区组成，每个扇区大小为4KB，最小擦除粒度同样为4KB(1扇区)；信息存储器也由两个独立的BANK组成：BANK0和BANK1，每个BANK为8KB，各有2个扇区。
+
+\subsubsection{操作函数}
+
+\begin{ccode}
+  bool MAP_FlashCtl_protectSector(uint_fast8_t memorySpace,
+   uint32_t sectorMask);
+\end{ccode}
+
+函数用途：启用指定扇区的写保护；
+返回值：若写保护成功启用则返回true，反之亦然。
+
+\begin{ccode}
+  bool MAP_FlashCtl_unprotectSector(uint_fast8_t memorySpace,
+   uint32_t sectorMask);
+\end{ccode}
+
+函数用途：禁用指定扇区的写保护；
+返回值：若写保护成功禁用则返回true，反之亦然
+
+\begin{ccode}
+  bool MAP_FlashCtl_performMassErase(void);
+\end{ccode}
+
+函数用途：对所有未开启写保护的扇区执行整体擦除；若扇区启用写保护，则忽略；
+返回值：若成功擦除则返回true，反之亦然。
+
+\begin{ccode}
+  bool MAP_FlashCtl_programMemory(void* src, void* dest,
+   uint32_t length);
+\end{ccode}
+
+函数用途：用提供的数据对扇区的指定地址进行写入；
+返回值：若成功写入则返回true，反之亦然。
+
+\subsection{控制 LED 灯}
+
+这部分内容上次实验就用过了，但是 ppt 中没有详细讲。从书中及其他资料我们得知，GPIO\{X\} 中的 PIN0,1,2 分别代表 LED\{X\} 的红灯、绿灯和蓝灯。同时开启可以有混色效果。
+
 \section{实验步骤}
+
+\subsection{Flash 的擦除和写入}
+
+\begin{enumerate}
+  \item 打开位于工程06\_02的代码，单击Debug按钮，进入调试状态；单击Step Over按钮，可单步调试；
+  \item 程序运行到第一次擦除后，观察指定扇区的值全为 F，这是因为 Flash 擦除原理只能由 0 到 1
+  \item 程序运行到第一次写入后，观察指定扇区的值全为 56，因为同时关闭了两个扇区的写保护，所有都会被写入 56
+  \item 程序运行到第二次擦除后，观察指定扇区的值只有 S30 为 56，因为开启了 S31 的写保护
+  \item 在重新上电后，观察指定扇区的值没有发生变化，因为 Flash 是不易失的
+\end{enumerate}
+
+\subsection{烧录指示灯的实现}
+
+\begin{enumerate}
+  \item 自行新建keil工程，工程名格式：burn\_学号，并存放在工程06\_03文件夹内；
+  \item 将自己学号的后两位数字以十六进制存入变量stuNum，例如学号后两位为33，则strNum=0x33；同时请将CPU主频设置为48M； 
+  \item 按压S1键，擦除主存储器BANK1的29扇区，成功擦除则使LED2的蓝灯常亮，否则使LED1（红灯）常亮；
+  \item 按压S2键，将stuNum写入主存储器BANK1的29扇区，成功写入则使LED2的绿灯常亮，否则使LED1（红灯）常亮；
+  \item 同时按压S1键和S2键，读取主存储器BANK1的29扇区的任意单个字节至变量S29，如果变量S29的值等于strNum，则使得LED2亮白色，否则LED1（红灯）常亮；
+\end{enumerate}
 
 \section{调试过程、结果与分析}
 
+\subsection{Flash 的擦除和写入}
+
+不需要对代码进行改动
+
+\subsection{烧录指示灯的实现}
+
+\begin{ccode}
+  #define BANKl_S29 (0x3D000)
+  #define strNum 0x11
+  #define SIZE 4096
+  #define COUNT (1200000)
+\end{ccode}
+
+分别表示 BANK1 29扇区的位置，我的学号末两位（11），扇区大小，循环次数（用来等待两个键一起按的时间差）
+
+\begin{ccode}
+  volatile char S29 = 0x00;
+  volatile int pos;
+
+  // fill the bank with strNum
+  memset(array, strNum, SIZE);
+
+  // stop the watch dog
+  MAP_WDT_A_holdTimer();
+
+  // set MCLK to 48MHz
+  MAP_PCM_setCoreVoltageLevel(PCM_VCORE1);
+  FlashCtl_setWaitState(FLASH_BANK0, 1);
+  FlashCtl_setWaitState(FLASH_BANK1, 1);
+  MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
+
+  // close the write protection
+  MAP_FlashCtl_unprotectSector(FLASH_MAIN_MEMORY_SPACE_BANK1,
+   FLASH_SECTOR29);
+
+  // LED1 R(P1.0) LED2 R(P2.0) LED2 G(P2.1) LED2 B(P2.2)
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0);
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN1);
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2);
+
+  // initialize, should be off when start
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN1);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
+
+  // S1(P1.1) S2(P1.4)
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4);
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN4);
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN4);
+
+  // interrupt
+  MAP_Interrupt_enableInterrupt(INT_PORT1);
+  MAP_Interrupt_enableMaster();
+\end{ccode}
+
+初始化，总共干了以下事情
+
+\begin{enumerate}
+  \item 准备写入的数据，大小为 4096 的数据，里面全是 11 （我的学号末 2 位）
+  \item 停止看门狗计数器
+  \item 设置 CPU 主频为 48MHz
+  \item 关闭 Bank1 S29 写保护
+  \item 设置 LED1 红灯为 P1.0，LED2 红灯绿灯蓝灯分别为P2.0、P2.1、P2.2，并初始化为暗状态
+  \item 设置 S1为 P1.1，S2 为 P1.4
+  \item 初始化清楚中断标志并且开启中断
+\end{enumerate}
+
+\begin{ccode}
+  void PORT1_IRQHandler(void)
+  {
+    uint32_t status;
+    status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
+
+    // 1st bit rep for PIN1, 2nd bit for PIN4
+    status = (status & GPIO_PIN1) | ((status & GPIO_PIN4) << 1);
+
+    // update the button
+    button |= status;
+
+    // start the timer
+    if (button == 0)
+    {
+      time = COUNT;
+    }
+  }
+\end{ccode}
+
+中断控制函数，获取中断标志，并且加以转化，最低位二进制表示 S1，第二个表示 S2。如果第一次按下 S1 或 S2 则开启计数。如果两下都在一定的时间内，这里是空循环跑 COUNT 次，则看作是同时按下两个键。
+
+\begin{ccode}
+  while (1)
+  {
+    if (!button)
+    {
+      for (; button != 3; --time);
+      time = COUNT;
+    }
+    else
+    {
+      switch (button)
+      {
+      case 1:
+        // turn off the other lights
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN1);
+
+        if (!MAP_FlashCtl_performMassErase()) // failed to erase
+        {
+          // turn off LED1 R, turn on LED2 B
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
+        }
+\end{ccode}
+
+\begin{ccode}
+        else // succeed to erase
+        {
+          // opposite
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN2);
+        }
+        break;
+      
+      case 2:
+        // turn off the other lights
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
+        if (!MAP_FlashCtl_programMemory(array, (void *)BANKl_S29, SIZE))
+        {
+          // turn off LED2 G, turn on LED1 R
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN1);
+        }
+
+        else
+        {
+          // opposite
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN1);
+        }
+        break;
+      case 3:
+
+        // randomly select a position in BANK1_S29
+        pos = rand() % SIZE;
+        S29 = *((unsigned char *)(BANKl_S29 + pos));
+
+        // if the char is what we want
+        if (S29 == strNum)
+        {
+          // turn on red, green, blue light on LED2 only,
+          // which is white light
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN0);
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN1);
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN2);
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+        }
+        else
+        {
+          // only red light on LED1 only
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN1);
+          MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
+          MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
+        }
+
+        break;
+      default:
+        break;
+      }
+      button = 0;
+    }
+  }
+\end{ccode}
+
+主循环最开始用来获取信号，等待两个键同时按下（通过跑空循环的方式）。然后就是分别对三种情况按要求操作。使用之前用到的 \mintinline{c}|MAP_FlashCtl_performMassErase| 进行整体擦除，使用
+\\ \mintinline{c}|MAP_GPIO_setOutputLowOnPin| 关闭灯，使用 \mintinline{c}|MAP_GPIO_setOutputHighOnPin| 开启灯，\\ 
+使用 \mintinline{c}|MAP_FlashCtl_programMemory| 写入数据，使用指针取地址直接读取数据。这里是随机读入数据。
+
+课堂上和助教检查结果，符合 ppt 要求
 \section{总结}
+
+https://www.ti.com/tool/MSP-EXP432P401R\#technicaldocuments 给予了有用的介绍和思路
 
 \section{附件}
 
