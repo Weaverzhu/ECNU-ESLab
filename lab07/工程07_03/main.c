@@ -55,7 +55,7 @@ int main(void)
     MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
     // MAP_CS_initClockSignal(CS_MCLK, CLOCK, Frequency[speed]); 
 	*/
-		MAP_PCM_setCoreVoltageLevel(PCM_VCORE0);    
+	MAP_PCM_setCoreVoltageLevel(PCM_VCORE0);    
     FlashCtl_setWaitState(FLASH_BANK0, 1);
     FlashCtl_setWaitState(FLASH_BANK1, 1);
     MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
@@ -108,8 +108,10 @@ void PORT1_IRQHandler(void)
         MAP_CS_initClockSignal(CS_MCLK, CLOCK, Frequency[speed]);
     }
     if (status & GPIO_PIN4) {
-        color = Green;
-				changecolor(color);
-        timer = Delay[color];
+        if (color != Green) {
+            color = Green;
+            changecolor(color);
+            timer = Delay[color];
+        }
     }
 }

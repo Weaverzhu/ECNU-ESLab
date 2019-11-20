@@ -1,5 +1,3 @@
-#define __MSP432P401R__
-
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 #include <string.h>
 

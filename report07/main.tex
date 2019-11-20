@@ -1,0 +1,439 @@
+\RequirePackage{fix-cm}
+\documentclass[a4paper,10pt,UTF8]{paper}
+%\documentclass[a4paper,10pt,UTF8]{ctexart}
+
+\usepackage[english]{babel}
+\usepackage{fancyhdr,array,lastpage,amsmath,mathtools,enumitem,graphicx,multirow,tocbibind,longtable,makecell,varwidth,titlesec,bm,booktabs,comment,minted}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+
+
+
+\usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{tikz,flowchart}
+\usepackage{ctex}
+\usepackage{xeCJK}%中文字体
+\usetikzlibrary{shapes,shapes.geometric,arrows,matrix,calc}
+\usetikzlibrary{circuits.logic}
+
+% \usetikzlibrary{circuits.logic.custom}
+\usetikzlibrary{circuits.logic.IEC}
+\usetikzlibrary{shadows}
+\usepackage{listings}
+\usepackage[Q=yes]{examplep}
+\usepackage{fancyhdr}
+\usepackage{alphalph}
+\usepackage{indentfirst}
+
+% \setCJKsansfont{黑体}
+\setmainfont{PingFang SC}
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setmonofont{Monaco}
+
+\newenvironment{sol}
+  {\par\vspace{2mm}\noindent{\bf Solution}. }
+
+\lstset{escapeinside=``, breaklines=true, frame=none, extendedchars=false, basicstyle=\ttfamily, showstringspaces=false}
+
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{1.5ex plus 0.5ex minus 0.2ex}
+\linespread{1.1}
+
+\bibliographystyle{plain}
+
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\title{华东师范大学计算机科学技术系上机实验报告}
+
+\begin{document}
+\pagestyle{fancy}
+\chead{\small\color{gray}华东师范大学计算机科学技术系上机实验报告}
+\lhead{}
+\rhead{}
+\makeatletter
+\def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi%
+\color{gray}\hrule\@height 0.2pt\@width\headwidth}
+  \vspace{6mm}}
+\makeatother
+
+\newcommand{\HRule}{\rule{\linewidth}{1mm}}
+\newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
+
+{\center {\huge \bfseries \LARGE{华东师范大学计算机科学技术系上机实验报告}} \\ [0.8cm]
+
+\small{
+  \begin{minipage}[t]{.32\linewidth}
+    \textbf{课程名称：} 嵌入式系统原理与实践\\
+    \textbf{指导教师：} 沈建华\\
+    \textbf{上机实践名称：} GPIO与中断\\
+    \textbf{实践编号：}实验 7
+  \end{minipage}
+  \begin{minipage}[t]{.32\linewidth}
+    \textbf{年级：}17 级\\
+    \textbf{姓名：}朱桐\\
+    \textbf{学号：}10175102111\\
+    \textbf{组号：}A
+  \end{minipage} 
+  \begin{minipage}[t]{.32\linewidth}
+    \textbf{上机实践成绩：} \\
+    \textbf{创新实践成绩：} \\
+    \textbf{上机实践日期：}2019/11/19\\
+    \textbf{上机实践时间：}2 学时\\
+  \end{minipage}
+}
+\HRule \\[0.5cm]
+}
+
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newminted{asm}{bgcolor=bg}
+\newminted{c}{bgcolor=bg}
+
+\section{实验目的}
+
+\begin{enumerate}
+    \item 掌握GPIO输入配置及编程方法
+    \item 掌握GPIO输入中断
+    \item 掌握GPIO输出配置及编程方法
+\end{enumerate}
+
+\section{实验设备}
+
+\begin{enumerate}
+  \item 软件Keil5
+  \item MSP-EXP432P401R开发板
+
+\end{enumerate}
+
+\section{实验内容}
+
+\begin{itemize}
+  \item 理解GPIO的原理，练习GPIO输入输出配置
+  \item 理解中断和查询的区别，练习GPIO输入中断相关编程
+  \item 进行GPIO输入输出配置和中断综合练习，实现交通信号灯
+\end{itemize}
+
+\section{实验原理}
+
+\subsection{GPIO输入输出配置}
+
+初始化配置步骤：
+\begin{enumerate}
+  \item 选择GPIO的工作方向（包括输入和输出两个方向）。
+  \item 选择GPIO模式（包括推拉、开漏、上/下拉输入或输出）。
+  \item 清除GPIO中断标志位。
+  \item 使能GPIO中断。
+\end{enumerate}
+
+\subsection{相关函数介绍}
+
+
+\begin{ccode}
+  MAP_WDT_A_holdTimer();
+\end{ccode}
+
+关闭看门狗计时器
+
+\begin{ccode}
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P1,GPIO_PIN0);
+  GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+  GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
+  GPIO_toggleOutputOnPin(GPIO_PORT_P2,GPIO_PIN1);
+\end{ccode}
+
+我们之前的实验已经得知 P1.0 是 LED1 的红灯，P2.0、P2.1、P2.2 分别为 LED2 的红灯绿灯和蓝灯。设置输出端可以让我们控制这些 LED。然后通过设置高来让灯常量，设置低关闭，也可以使用 toggle 更改状态。
+
+\begin{ccode}
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4);  
+  //设置P1.1（s1按键）为输入模式并拉高
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN4);   //清除P1.1中断 
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN4);  //使能GPIO1.1中断
+  MAP_Interrupt_enableInterrupt(INT_PORT1); //使能PORT1中断
+\end{ccode}
+
+我们之前的实验已经得知 P1.1 为 S1，P1.4 为 S2。设置为输入模式并拉高，初始化中断可以让我们在按下按键的时候引发中断进入特殊的中断函数。
+
+\begin{ccode}
+  void PORT1_IRQHandler(void)
+  {
+    uint32_t status;
+
+    status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
+    // ...
+  }
+\end{ccode}
+
+进入中断函数，我们可以使用 getEnabledInterruptStatus 来获取哪些按键被按下。这是用二进制表达的状态。如果 \mintinline{c}|stataus & GPIO_PIN1 > 0| 说明 PIN1 (S1) 被按下。 
+
+\begin{ccode}
+  MAP_CS_initClockSignal(CS_MCLK, CLOCK, CS_CLOCK_DIVIDER_64);
+\end{ccode}
+
+使用这个函数进行分频，控制 MCLK 速度进而控制运行速度
+
+\section{实验步骤}
+
+\subsection{练习1}
+
+\begin{enumerate}
+  \item 自行新建keil工程，工程名格式：light\_学号；部分文件已经存放于工程07\_01，keil的工程文件请存放在keil文件夹下。
+  \item 请实现以下功能：按压S1键，白灯灯亮，再次按压S1键，白灯灯灭，每次按压S1键都切换灯的亮灭状态。
+  \item 请使用LED2的红灯、绿灯和蓝灯实现白灯，LED2的红灯、绿灯、蓝灯引脚分别为P2.0，P2.1，P2.2（电路细节可查看相关原理图章节）。
+\end{enumerate}
+
+设置 LED2, S1，然后中断函数里面如果按下 S1, 
+\\ 使用 \mintinline{c}| GPIO_toggleOutputOnPin(GPIO_PORT_P2,GPIO_PIN1); | 等函数反转 LED2 的 RGB 三个灯，实现白色灯光开关的效果。
+
+\subsection{练习二}
+
+\begin{enumerate}
+  \item 将工程07\_02编译烧写至开发板，其实现效果与工程05\_03相同。即开发板的LED2（绿灯）先闪烁两次，然后LED1（红灯）周期性地闪烁；当按压键S1(P1.1)时，增大count值，count值用于延时函数MyDelay，即随着count值增大，LED1的闪烁频率变慢；随着延时时长逐渐增大，因看门狗计数器未及时清零而引发看门狗复位。
+  \item 工程07\_02使用中断方式，工程05\_03使用查询方式。对比查询方式与中断方式，理解两者之间的区别，根据设定的主频计算按压几次S1键会产生看门狗复位，并观察实验现象是否符合计算结果。
+  \item 将工程07\_02中的S1键改为S2键（S2为P1.4），LED1的红灯改为LED2的红灯（LED2的红灯为P2.0）。
+\end{enumerate}
+
+与上次的实验通过 while(1) 不断采样不一样，我们使用中断函数获取输入。如果不断采样，将不可避免发生如果我们按下键程序控制流不在输入的时候，按键就无效了因此不能得到所有输入。而如果使用输入，就可以像事件触发器一样，一定可以获得输入。
+
+\subsection{练习三}
+
+\begin{enumerate}
+  \item 新建交通信号灯Keil工程，工程名为：tsl\_学号；在工程07\_03文件夹下已经新建好相关路径，请将Keil相关工程文件存放在命名为“keil”的文件夹下
+  \item LED2中有红、绿、蓝三种颜色的灯，请使用LED2实现交通信号灯中的红灯、黄灯和绿灯。
+  \item 首先请按照绿灯（常亮，空循环600000次）、黄灯（常亮，空循环300000次）、红灯（常亮，空循环1200000次）的顺序依次循环；按压S1键，可调整MCLK主时钟频率由快变慢，要求7次变化为一个周期，并能明显观察到变化的实验现象；按压S2键，当交通灯处于黄灯或红灯时，立即切换成绿灯，并继续保持绿灯、黄灯、红灯的循环顺序。
+  \item LED2的红、绿、蓝灯配置引脚依次为P2.0，P2.1，P2.2。
+  \item 通过交通信号灯的实现，了解GPIO中断、GPIO输出模式、GPIO输入模式和时钟树MCLK的配置，并同时熟练掌握Keil新建工程。
+\end{enumerate}
+
+大致思路是 
+
+\begin{itemize}
+  \item 使用0，1，2分别表示红灯绿灯黄灯，然后循环取模控制状态。通过 timer 控制灯的持续时间。
+  \item 每次改变颜色将会重设 timer
+  \item 通过时钟分频（实验5我们已经做过相关内容）控制 CPU 速度
+  \item 相关 LED 灯的控制和 S1,S2 键位的控制之前的内容已经提过了
+\end{itemize}
+
+\section{调试过程、结果与分析}
+
+\subsection{练习1}
+
+一共两部分内容
+
+\begin{ccode}
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);  
+  //设置P1.1（s1按键）为输入模式并拉高  
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);  //使能GPIO1.1中断
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);   //清除P1.1中断 
+  
+  
+  MAP_Interrupt_enableInterrupt(INT_PORT1); //使能PORT1中断
+  MAP_Interrupt_enableMaster();  //开启中断总开关  
+  
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN0);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+  
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN1);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+  
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN2);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+
+  while(1){}
+\end{ccode}
+
+先初始化，然后进入死循环等待输入
+
+\begin{ccode}
+  void PORT1_IRQHandler(void)
+  {
+    uint32_t status;
+
+    status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
+
+    if (status & GPIO_PIN1) {
+      GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN0);
+      GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN1);
+      GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN2);
+    }
+  }
+\end{ccode}
+
+中断函数，如果按下则 toggle 所有的 LED2
+
+\subsection{练习2}
+
+\begin{ccode}
+  // ...
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4); 
+   //设置P1.1（s1按键）为输入模式并拉高
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN4);   //清除P1.1中断 
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN4);  //使能GPIO1.1中断
+  // ...
+
+  if(status & GPIO_PIN4)
+  // ...
+\end{ccode}
+
+将 P1.1 改为 P1.4 可以将 S1 改位 S2
+
+\begin{ccode}
+  GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN0);
+  GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+  // ...
+  GPIO_toggleOutputOnPin(GPIO_PORT_P2,GPIO_PIN0); 
+  //翻转P1.0电平，LED1状态改变
+\end{ccode}
+
+将 P1.0 改位 P2.0 将 LED1 红灯改为 LED2 的红灯
+
+\subsection{练习3}
+
+\begin{ccode}
+  int timer, color, speed;
+
+  #define Green 0
+  #define Yellow 1
+  #define Red 2
+  #define SIZE 3
+
+  #define CLOCK CS_DCOCLK_SELECT
+
+  const int Delay[] = {
+    600000, 300000, 1200000
+  };
+
+  const uint32_t Frequency[] = {
+    CS_CLOCK_DIVIDER_1,
+    CS_CLOCK_DIVIDER_2,
+    CS_CLOCK_DIVIDER_4,
+    CS_CLOCK_DIVIDER_8,
+    CS_CLOCK_DIVIDER_16,
+    CS_CLOCK_DIVIDER_32,
+    CS_CLOCK_DIVIDER_64
+  };
+\end{ccode}
+
+timer 表示循环次数作为计数器，color = [0,1,2] 表示颜色，Delay[] 为相关颜色循环次数，Frequency[] 表示分频和 speed 共同控制速度
+
+\begin{ccode}
+  void changecolor(int color) {
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+    switch (color)
+    {
+    case Green:
+      MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
+      break;
+    case Yellow:
+      MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
+      MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
+      break;
+    case Red:
+      MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
+      break;
+    
+    default:
+      break;
+    }
+  }
+\end{ccode}
+
+改变颜色时，需要关闭所有的其他灯，然后设置我们想要的灯。黄灯为红灯加上绿灯。
+
+\begin{ccode}
+  MAP_PCM_setCoreVoltageLevel(PCM_VCORE0);    
+  FlashCtl_setWaitState(FLASH_BANK0, 1);
+  FlashCtl_setWaitState(FLASH_BANK1, 1);
+  MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
+  speed = 0;
+  MAP_CS_initClockSignal(CS_MCLK, CLOCK, Frequency[speed]); 
+\end{ccode}
+
+初始化时钟为 DCO 48Mhz，因为默认的时钟 (3 Mhz) 跑要求的循环次数实在是太慢了，不方便调试和检查。我们初始化时钟为不分频（最快）
+
+\begin{ccode}
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);  //设置P1.1（s1按键）为输入模式并拉高  
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4);  //设置P1.4（s2按键）为输入模式并拉高
+  
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);  //使能GPIO1.1中断
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);   //清除P1.1中断 
+  
+  MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN4);  //使能GPIO1.4中断
+  MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN4);   //清除P1.1中断 
+  
+  MAP_Interrupt_enableInterrupt(INT_PORT1); //使能PORT1中断
+  MAP_Interrupt_enableMaster();  //开启中断总开关  
+  
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN0);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+  
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN1);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+  
+  MAP_GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN2);
+  MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+  
+  color = Green;
+  timer = Delay[color];
+  changecolor(color);
+\end{ccode}
+
+初始化 GPIO，并且初始化为绿灯
+
+\begin{ccode}
+  while (1) {
+    while (timer--);
+    color = (color + 1) % SIZE;
+    changecolor(color);
+    timer = Delay[color];
+  }
+\end{ccode}
+
+主循环，就是计数器到了就自动转换成下一个颜色，然后初始化计数器
+
+\begin{ccode}
+  void PORT1_IRQHandler(void)
+  {
+    uint32_t status;
+
+    status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
+
+    if (status & GPIO_PIN1) {
+      speed = (speed + 1) % 7;
+      MAP_CS_initClockSignal(CS_MCLK, CLOCK, Frequency[speed]);
+    }
+    if (status & GPIO_PIN4) {
+      if (color != Green) {
+        color = Green;
+        changecolor(color);
+        timer = Delay[color];
+      }
+    }
+  }
+\end{ccode}
+
+中断函数，分为两个部分
+
+\begin{enumerate}
+  \item 如果 S1 按下，则更改速度，速度为 0-6 循环取模，然后使用 initClockSignal 使用分频控制始终速度
+  \item 如果 S2 按下，直接判断是否为红灯黄灯，然后改变 color 然后重设计数器
+\end{enumerate}
+
+\section{总结}
+
+\section{附件}
+
+\end{document}
