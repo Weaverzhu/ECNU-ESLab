@@ -364,8 +364,10 @@ timer 表示循环次数作为计数器，color = [0,1,2] 表示颜色，Delay[]
 初始化时钟为 DCO 48Mhz，因为默认的时钟 (3 Mhz) 跑要求的循环次数实在是太慢了，不方便调试和检查。我们初始化时钟为不分频（最快）
 
 \begin{ccode}
-  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);  //设置P1.1（s1按键）为输入模式并拉高  
-  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4);  //设置P1.4（s2按键）为输入模式并拉高
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1); 
+   //设置P1.1（s1按键）为输入模式并拉高  
+  MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4); 
+   //设置P1.4（s2按键）为输入模式并拉高
   
   MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);  //使能GPIO1.1中断
   MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);   //清除P1.1中断 
@@ -433,6 +435,9 @@ timer 表示循环次数作为计数器，color = [0,1,2] 表示颜色，Delay[]
 \end{enumerate}
 
 \section{总结}
+
+只要熟悉相关接口，剩下的嵌入式编程就和我们以前熟悉的变成一样简单了
+
 
 \section{附件}
 
