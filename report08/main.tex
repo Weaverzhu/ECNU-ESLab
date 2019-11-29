@@ -63,66 +63,345 @@
 \rhead{}
 \makeatletter
 \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi%
-\color{gray}\hrule\@height 0.2pt\@width\headwidth}
-  \vspace{6mm}}
+    \color{gray}\hrule\@height 0.2pt\@width\headwidth}
+    \vspace{6mm}}
 \makeatother
 
 \newcommand{\HRule}{\rule{\linewidth}{1mm}}
 \newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
 
 {\center {\huge \bfseries \LARGE{华东师范大学计算机科学技术系上机实验报告}} \\ [0.8cm]
-
-\small{
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{课程名称：}计算机组成与结构实践\\
-    \textbf{指导教师：}金健\\
-    \textbf{上机实践名称：} TODO\\
-    \textbf{实践编号：}实验 1
-  \end{minipage}
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{年级：}17 级\\
-    \textbf{姓名：}朱桐\\
-    \textbf{学号：}10175102111\\
-    \textbf{组号：}A
-  \end{minipage} 
-  \begin{minipage}[t]{.32\linewidth}
-    \textbf{上机实践成绩：} \\
-    \textbf{创新实践成绩：} \\
-    \textbf{上机实践日期：}2019/09/20\\
-    \textbf{上机实践时间：}2 学时\\
-  \end{minipage}
-}
-\HRule \\[0.5cm]
+    
+    \small{
+        \begin{minipage}[t]{.32\linewidth}
+            \textbf{课程名称：}嵌入式系统原理与实践\\
+            \textbf{指导教师：}沈建华\\
+            \textbf{上机实践名称：} 基本定时器\\
+            \textbf{实践编号：}实验 1
+        \end{minipage}
+        \begin{minipage}[t]{.32\linewidth}
+            \textbf{年级：}17 级\\
+            \textbf{姓名：}朱桐\\
+            \textbf{学号：}10175102111\\
+            \textbf{组号：}A
+        \end{minipage} 
+        \begin{minipage}[t]{.32\linewidth}
+            \textbf{上机实践成绩：} \\
+            \textbf{创新实践成绩：} \\
+            \textbf{上机实践日期：}2019/09/20\\
+            \textbf{上机实践时间：}2 学时\\
+        \end{minipage}
+    }
+    \HRule \\[0.5cm]
 }
 
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \newminted{asm}{bgcolor=bg}
+\newminted{c}{bgcolor=bg}
 
 \section{实验目的}
 
 \begin{enumerate}
-    \item 了解两种控制方式：“手动”和“微控制”
-    \item 了解两种实验方式：“搭接”和“在线”
-    \item 理解并学会设置手动搭接实验方式
-    \item 熟悉与了解准双向 I/O 口的构成原理
-    \item 掌握准双向 I/O 口的输入/输出特性的运用
-    \item 熟悉通用寄存器的数据通路
-    \item 掌握通用寄存器的构成和运用
+    \item 掌握基本定时器Timer32相关库函数的配置
+    \item 学会使用定时器进行定时并触发中断
 \end{enumerate}
 
 \section{实验设备}
 
+\begin{enumerate}
+    \item 软件Keil5
+    \item MSP-EXP432P401R开发板
+    \item LED交通信号灯模块
+\end{enumerate}
 
 \section{实验内容}
 
+\begin{enumerate}
+    \item 理解定时器的原理，完成更精确的灯闪练习
+    \item 利用定时器完善交通信号灯实验
+\end{enumerate}
 
 \section{实验原理}
 
+\subsection{基本定时器}
+
+MSP432包含多种定时器，比如Timer32、TimerA、WDT（看门狗定时器）Systick（系统滴答定时器）。其中Timer32定时器由两个可配置的计数器组成，当计数器递减到0时产生中断。其具有以下几个特点：
+
+\begin{enumerate}
+    \item 支持两个独立的计数器，每个计数器可配置为32位模式或16位模式；
+    \item 每个计数器支持三种不同的计时模式：自由计数、周期计数和单次计数；
+    \item 可配置分频系数，可将输入时钟频率除以1、16或256；
+    \item 支持单个计数器独立中断，同样也支持两个计数器的组合中断。
+\end{enumerate}
+
+设置 DCO 和 MCLK 频率
+
+\begin{ccode}
+    MAP_CS_setDCOFrequency(10000000); /* 设置DCO频率为指定频率，此处DCO=10M*/
+    //![Simple FPU Config]
+    
+    MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); 
+    /*设置MCLK（主时钟频率），MCLK=DCO频率/时钟分频系数，此处MCLK=DCO=1M*/
+\end{ccode}
+
+设置时钟中断和周期，这里将时钟周期和频率设置一致，则周期为 1s。秒数 = 周期 / 频率
+
+\begin{ccode}
+    MAP_Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, 
+    TIMER32_32BIT,TIMER32_PERIODIC_MODE);
+    
+    MAP_Interrupt_enableInterrupt(INT_T32_INT1);    
+    MAP_Timer32_enableInterrupt(TIMER32_0_BASE);
+    
+    MAP_Interrupt_enableMaster();/*使能中断总开关*/
+    
+    MAP_Timer32_setCount(TIMER32_0_BASE,10000000);
+\end{ccode}
+
+中断函数，别忘了清除中断标志
+
+\begin{ccode}
+    void T32_INT1_IRQHandler(void)
+    {
+        MAP_Timer32_clearInterruptFlag(TIMER32_0_BASE); 
+    }
+\end{ccode}
+
 \section{实验步骤}
+
+\subsection{练习1}
+
+\begin{enumerate}
+    \item 请将工程08\_01中的MCLK配置为10M；
+    \item 请使用学号后两位数字配置LED的闪烁周期：例如学号后两位数字为09，即0和9（若有数字为0，请转成10），则让LED1的红灯以10秒的间隔进行闪烁，同时让LED2的绿灯以9秒的间隔进行闪烁。
+\end{enumerate}
+
+
+\subsection{练习2}
+
+\begin{enumerate}
+    \item 新建交通信号灯keil工程，工程名为：tsl2\_学号，并保存到工程08\_02文件夹下；
+    \item 上电运行后，信号灯处于循环模式，即按照绿灯（亮5秒）、黄灯（亮1.5秒）、红灯（亮2.5秒）的顺序依次循环；
+    \item 按压S1键，信号灯的绿灯一直保持常亮，表示允许通过；
+    \item 按压S2键，信号灯的红灯一直保持常亮，表示禁止通过；
+    \item 当信号灯处于通行或者禁行模式时，同时按压S1键和S2键，信号灯回到循环模式（从绿灯开始循环）；
+    \item 请使用新的LED交通信号灯模块来实现。
+\end{enumerate}
 
 \section{调试过程、结果与分析}
 
+\subsection{练习1}
+
+
+更改周期即可，非常简单。学号10175102111，这里把两个周期都设置为 1s
+
+\begin{ccode}
+    MAP_CS_setDCOFrequency(10000000); /* 设置DCO频率为指定频率，此处DCO=10M*/
+    //![Simple FPU Config]
+    
+    MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); 
+    /*设置MCLK（主时钟频率），MCLK=DCO频率/时钟分频系数，此处MCLK=DCO=1M*/
+
+    MAP_Timer32_setCount(TIMER32_0_BASE,10000000);
+    MAP_Timer32_setCount(TIMER32_1_BASE,10000000);
+\end{ccode}
+
+\subsection{练习2}
+
+\begin{enumerate}
+    \item 使用 0-2 三个整数表示红绿灯三种颜色的状态
+    \item 使用计时器计时，计时器中断的时候切换状态
+    \item 使用另一个计时器计时，按下第一个键时候开始计时，等待一段时间后如果按下第二个键，视为两个键一切按下，否则算作一下一个键（消噪）
+\end{enumerate}
+
+初始化 MCLK, DCO
+
+\begin{ccode}
+    MAP_WDT_A_holdTimer();
+    MAP_FPU_enableModule();
+    MAP_CS_setDCOFrequency(10000000);
+
+    MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+\end{ccode}
+
+设置 GPIO，这里将 RYG 分别设置为 P4.0, P4.0, P5.4
+
+\begin{ccode}
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
+    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
+
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN0);
+    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN0);
+
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN4);
+    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN4);
+
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P5, GPIO_PIN4);
+    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN4);
+    
+    MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);
+    MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4);
+
+    MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);
+
+    MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN4);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN4);
+
+    MAP_Interrupt_enableInterrupt(INT_PORT1);
+    MAP_Interrupt_enableMaster();
+
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN4);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P4, GPIO_PIN4);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P4, GPIO_PIN0);
+\end{ccode}
+
+初始化时钟
+
+\begin{ccode}
+	MAP_Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1,
+	 TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+	MAP_Timer32_initModule(TIMER32_1_BASE, TIMER32_PRESCALER_1,
+	 TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+
+    MAP_Interrupt_enableInterrupt(INT_T32_INT1);
+    MAP_Timer32_enableInterrupt(TIMER32_0_BASE);
+
+    MAP_Interrupt_enableInterrupt(INT_T32_INT2);
+    MAP_Timer32_enableInterrupt(TIMER32_1_BASE);
+\end{ccode}
+
+初始化颜色为绿色，并开启主循环
+
+\begin{ccode}
+    setcolor(color);
+    while (1)
+    {
+    }
+\end{ccode}
+
+第一个时钟用来切换颜色
+
+\begin{ccode}
+    void T32_INT1_IRQHandler(void)
+    {
+        MAP_Timer32_clearInterruptFlag(TIMER32_0_BASE);
+        switchcolor();
+    }
+\end{ccode}
+
+切换颜色的函数，切换颜色的时候重新设置周期并计时
+
+\begin{ccode}
+    const int duration[] = {
+    60000000, 15000000, 25000000};
+
+    void setcolor(int color)
+    {
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN4);
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P4, GPIO_PIN4);
+        MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P4, GPIO_PIN0);
+        switch (color)
+        {
+        case 0:
+            MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN4);
+            break;
+        case 1:
+            MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN4);
+            break;
+        case 2:
+            MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN0);
+
+        default:
+            break;
+        }
+        MAP_Timer32_setCount(TIMER32_0_BASE, duration[color]);
+        MAP_Timer32_startTimer(TIMER32_0_BASE, false);
+    }
+\end{ccode}
+
+第二个时钟配合 GPIO P1.1, P1.4 输入，判断只按 S1, S2 或者两者一起按下
+
+\begin{ccode}
+    bool flag1, flag2;
+    int color, condition;
+\end{ccode}
+
+\begin{ccode}
+    void PORT1_IRQHandler(void)
+    {
+        uint32_t status;
+        status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
+        MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
+
+        if (status & GPIO_PIN1)
+        {
+            if (condition == 0)
+            {
+                MAP_Timer32_setCount(TIMER32_1_BASE, 1000000);
+
+                MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+                MAP_Timer32_startTimer(TIMER32_1_BASE, false);
+                condition = 1;
+            }
+            else
+            {
+                flag1 = flag2 = 0;
+                setcolor(color = 0);
+                condition = 0;
+            }
+        }
+        else if (status & GPIO_PIN4)
+        {
+
+            if (condition == 0)
+            {
+                MAP_Timer32_setCount(TIMER32_1_BASE, 1000000);
+                MAP_Timer32_startTimer(TIMER32_1_BASE, false);
+                MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+                condition = 2;
+            }
+            else
+            {
+                flag1 = flag2 = 0;
+                setcolor(color = 0);
+                condition = 0;
+            }
+        }
+        else if ((status & GPIO_PIN1) && (status & GPIO_PIN4))
+        {
+            flag1 = flag2 = 0;
+            setcolor(color = 0);
+            condition = 0;
+        }
+    }
+
+    void T32_INT2_IRQHandler(void)
+    {
+        MAP_Timer32_clearInterruptFlag(TIMER32_1_BASE);
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+        if (condition == 1)
+        {
+            flag1 = 1;
+            flag2 = 0;
+            color = 0;
+            setcolor(color);
+        }
+        else if (condition == 2)
+        {
+            flag1 = 0;
+            flag2 = 1;
+            color = 2;
+            setcolor(color);
+        }
+        condition = 0;
+    }
+\end{ccode}
+
 \section{总结}
+
+实际上实现的功能前几次都做过了，只是把空循环换成时钟中断。不过时钟中断的优点是不会影响程序控制流，否则可能会造成输入信号丢失。
 
 \section{附件}
 
