@@ -77,7 +77,7 @@
             \textbf{课程名称：}嵌入式系统原理与实践\\
             \textbf{指导教师：}沈建华\\
             \textbf{上机实践名称：} 基本定时器\\
-            \textbf{实践编号：}实验 1
+            \textbf{实践编号：}实验 8
         \end{minipage}
         \begin{minipage}[t]{.32\linewidth}
             \textbf{年级：}17 级\\
@@ -88,7 +88,7 @@
         \begin{minipage}[t]{.32\linewidth}
             \textbf{上机实践成绩：} \\
             \textbf{创新实践成绩：} \\
-            \textbf{上机实践日期：}2019/09/20\\
+            \textbf{上机实践日期：}2019/11/26\\
             \textbf{上机实践时间：}2 学时\\
         \end{minipage}
     }
@@ -260,10 +260,10 @@ MSP432包含多种定时器，比如Timer32、TimerA、WDT（看门狗定时器�
 初始化时钟
 
 \begin{ccode}
-	MAP_Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1,
-	 TIMER32_32BIT, TIMER32_PERIODIC_MODE);
-	MAP_Timer32_initModule(TIMER32_1_BASE, TIMER32_PRESCALER_1,
-	 TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+    MAP_Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1,
+     TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+    MAP_Timer32_initModule(TIMER32_1_BASE, TIMER32_PRESCALER_1,
+     TIMER32_32BIT, TIMER32_PERIODIC_MODE);
 
     MAP_Interrupt_enableInterrupt(INT_T32_INT1);
     MAP_Timer32_enableInterrupt(TIMER32_0_BASE);
