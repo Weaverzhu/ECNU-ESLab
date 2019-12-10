@@ -6,6 +6,7 @@ _minted-main
 *uvguix*
 *.tar
 \.vscode
+\实验*
 
 # Prerequisites
 *.d
