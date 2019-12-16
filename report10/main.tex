@@ -181,37 +181,37 @@ MSP432 上包含了 8 个兼容不同通信协议的模块—4个 eUSCI\_A 和 4
 
 \begin{ccode}
   bool UART_initModule (uint32_t moduleInstance, 
-		      const eUSCI_UART_Config *config)
+          const eUSCI_UART_Config *config)
 \end{ccode}
 
 \begin{itemize}
   \item 功能描述：初始化UART模块
-  \item 参数描述：moduleInstance	指定使用的UART模块
-  \item config		UART配置结构体
+  \item 参数描述：moduleInstance  指定使用的UART模块
+  \item config    UART配置结构体
 \end{itemize}
 
 UART 配置结构体
 
 \begin{itemize}
   \item selectClockSource  选择时钟源
-  \item clockPrescalar	   写入波特率寄存器的数
-  \item firstModReg	   第一阶段的调整器
-  \item secondModReg	   第二阶段的调整器
-  \item parity	           校验位，可选择无校验位、奇校验或偶校验
-  \item msborLsbFirst	   控制发送/接收移位寄存器的方向，可选择 LSB 或 MSB
+  \item clockPrescalar     写入波特率寄存器的数
+  \item firstModReg     第一阶段的调整器
+  \item secondModReg     第二阶段的调整器
+  \item parity             校验位，可选择无校验位、奇校验或偶校验
+  \item msborLsbFirst     控制发送/接收移位寄存器的方向，可选择 LSB 或 MSB
   \item numberofStopBits   停止位的位数，可选择一位或两位
-  \item uartMode	   选择 uart 模式
-  \item overSampling	   波特率产生方式
+  \item uartMode     选择 uart 模式
+  \item overSampling     波特率产生方式
 \end{itemize}
 
 \begin{ccode}
-  void UART_enableInterrupt (uint32_t moduleInstance, 				   uint_fast8_t mask)
+  void UART_enableInterrupt (uint32_t moduleInstance,   uint_fast8_t mask)
 \end{ccode}
 
 \begin{itemize}
   \item 功能描述： 使能UART模块指定中断
-  \item 参数描述：moduleInstance	指定使用的UART模块
-  \item mask			指定中断类型
+  \item 参数描述：moduleInstance  指定使用的UART模块
+  \item mask      指定中断类型
 \end{itemize}
 
 \section{实验步骤}
@@ -253,11 +253,20 @@ UART 配置结构体
   \item 在串口工具中发送数字“1”，则红灯被点亮；发送数字“2”，则绿灯被点亮；发送数字“3”，则蓝灯被点亮；发送其他ASCII字符，则RGB灯被熄灭。
 \end{itemize}
 
+思路：
+
+\begin{itemize}
+  \item 仿照实验一的路线，每次使用 UART 时引发中断
+  \item 中断函数中通过 \texttt{MAP\_UART\_getEnabledInterruptStatus} 读取字符
+  \item 如果字符是我们想要的，则改变 LED2 的颜色
+  \item 否则关闭 LED2 
+\end{itemize}
+
 \section{调试过程、结果与分析}
 
 每次urat发送中断读入一个字符判断他的ascii是否为0x31,0x32,0x33，然后在中断函数中通过gpio控制led
 
-初始化gpio led2
+初始化 \texttt{GPIO LED2}
 
 \begin{ccode}
   MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0);
@@ -271,7 +280,8 @@ UART 配置结构体
 配置urat
 
 \begin{ccode}
-  MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
+  MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN2 
+  | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
   
   MAP_UART_initModule(EUSCI_A0_BASE, &uartConfig);
 
@@ -309,6 +319,12 @@ UART 配置结构体
 \end{ccode}
 
 \section{总结}
+
+\begin{itemize}
+  \item 之前的中断函数大多需要清空中断标志，但是 UART 不用
+  \item UART 输入得到的结果是 ASCII 码，如果需要转换成对应的数字需要做相应的计算
+  \item 串口调试工具可以使用清空内容来清理输入输出框
+\end{itemize}
   
 \section{附件}
 
