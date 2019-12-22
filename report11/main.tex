@@ -264,15 +264,24 @@ SP432 包含一个 14 位的 ADC14 模块，支持快速 14 位模数转换。 A
 \begin{ccode}
     const eUSCI_UART_Config uartConfig =
     {
-        EUSCI_A_UART_CLOCKSOURCE_SMCLK,               //选用SMCLK（1M）时钟源
-        26,                                           // BRDIV = 26 ，clockPrescalar时钟分频系数
-        1,                                            // UCxBRF = 8  firstModReg （BRDIV、UCxBRF、 UCxBRS和SMCLK，用于设置串口波特率）
-        0,                                            // UCxBRS = 17 secondModReg
-        EUSCI_A_UART_NO_PARITY,                       // 校验位None
-        EUSCI_A_UART_LSB_FIRST,                       // 低位优先，小端模式
-        EUSCI_A_UART_ONE_STOP_BIT,                    // 停止位1位
-        EUSCI_A_UART_MODE,                            // UART mode
-        EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION // 设置为过采样，该数值为1
+        EUSCI_A_UART_CLOCKSOURCE_SMCLK,               
+        //选用SMCLK（1M）时钟源
+        26,                                           
+        // BRDIV = 26 ，clockPrescalar时钟分频系数
+        1,                                            
+        // UCxBRF = 8  firstModReg 
+        0,                                            
+        // UCxBRS = 17 secondModReg
+        EUSCI_A_UART_NO_PARITY,                       
+        // 校验位None
+        EUSCI_A_UART_LSB_FIRST,                       
+        // 低位优先，小端模式
+        EUSCI_A_UART_ONE_STOP_BIT,                    
+        // 停止位1位
+        EUSCI_A_UART_MODE,                           
+         // UART mode
+        EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION 
+        // 设置为过采样，该数值为1
     };
 \end{ccode}
 
@@ -302,9 +311,11 @@ SP432 包含一个 14 位的 ADC14 模块，支持快速 14 位模数转换。 A
     MAP_CS_initClockSignal(CS_HSMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); 
     MAP_CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);  
 
-    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1, GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
+	MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,
+	 GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
 
-    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5, GPIO_PIN5, GPIO_TERTIARY_MODULE_FUNCTION);
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5,
+     GPIO_PIN5, GPIO_TERTIARY_MODULE_FUNCTION);
 
     MAP_UART_initModule(EUSCI_A0_BASE, &uartConfig);
 
@@ -318,7 +329,8 @@ SP432 包含一个 14 位的 ADC14 模块，支持快速 14 位模数转换。 A
     ADC14_initModule(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_4, 0); 
 
     ADC14_configureSingleSampleMode(ADC_MEM0, true);  
-    ADC14_configureConversionMemory(ADC_MEM0, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A0, 0);
+    ADC14_configureConversionMemory(ADC_MEM0, 
+    ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A0, 0);
     ADC14_enableSampleTimer(ADC_MANUAL_ITERATION);
     ADC14_enableInterrupt(ADC_INT0);  
 
@@ -332,8 +344,10 @@ SP432 包含一个 14 位的 ADC14 模块，支持快速 14 位模数转换。 A
 配置 PWM，使用 将TimerA0的CCR1、CCR2及CCR3，和P2.0、P2.1及P2.2一一映射，并使能。TimerA0使用SMCLK作为时钟源，禁用CCR0中断，增计数模式，使能TimerA1 CCR0中断，使能中断总开关，以增计数模式启动TimerA0。
 
 \begin{ccode}
-    MAP_PMAP_configurePorts((const uint8_t *)port_mapping, PMAP_P2MAP, 1, PMAP_DISABLE_RECONFIGURATION);
-    MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN0 | GPIO_PIN1 | GPIO_PIN2, GPIO_PRIMARY_MODULE_FUNCTION);
+    MAP_PMAP_configurePorts((const uint8_t *)port_mapping, PMAP_P2MAP,
+     1, PMAP_DISABLE_RECONFIGURATION);
+    MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2,
+     GPIO_PIN0 | GPIO_PIN1 | GPIO_PIN2, GPIO_PRIMARY_MODULE_FUNCTION);
     MAP_Timer_A_configureUpMode(TIMER_A0_BASE, &TA0);
 
     MAP_Interrupt_enableInterrupt(INT_TA1_0); 
@@ -353,18 +367,18 @@ ADC 中断函数，如果捕获到中断，则执行相应的操作
 
         if (status & ADC_INT0)
         {
-            adcResult = ADC14_getResult(ADC_MEM0); /*将ADC_MEM0中的值赋值给adcResult*/
+            adcResult = ADC14_getResult(ADC_MEM0); 
             //adcResult = adcResult*1.0/16384;
             float c = adcResult * 1.0 / 16384;
 
             TA0_CCR1_PWM.compareValue = PWM_PERIODS * c;
-            MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR1_PWM); /*使用随机数设置TimerA0 CCR1（连接LED2的红灯）的PWM占空比*/
+            MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR1_PWM); 
 
             TA0_CCR2_PWM.compareValue = PWM_PERIODS * c;
-            MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR2_PWM); /*使用随机数设置TimerA0 CCR2（连接LED2的绿灯）的PWM占空比*/
+            MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR2_PWM);
 
             TA0_CCR3_PWM.compareValue = PWM_PERIODS * c;
-            MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR3_PWM); /*使用随机数设置TimerA0 CCR3（连接LED2的蓝灯）的PWM占空比*/
+            MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR3_PWM);
 
             ADC14_toggleConversionTrigger(); /*触发ADC模块开始采样*/
         }
