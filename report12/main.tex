@@ -1,0 +1,424 @@
+% !TEX encoding = UTF-8 Unicode
+\RequirePackage{fix-cm}
+\documentclass[a4paper,10pt,UTF8]{paper}
+%\documentclass[a4paper,10pt,UTF8]{ctexart}
+
+\usepackage[english]{babel}
+\usepackage{fancyhdr,array,lastpage,amsmath,mathtools,enumitem,graphicx,multirow,tocbibind,longtable,makecell,varwidth,titlesec,bm,booktabs,comment,minted}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+
+
+
+\usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{tikz,flowchart}
+\usepackage{ctex}
+\usepackage{xeCJK}%中文字体
+\usetikzlibrary{shapes,shapes.geometric,arrows,matrix,calc}
+\usetikzlibrary{circuits.logic}
+
+% \usetikzlibrary{circuits.logic.custom}
+\usetikzlibrary{circuits.logic.IEC,automata,positioning}
+\usetikzlibrary{shadows}
+\usepackage{listings}
+\usepackage[Q=yes]{examplep}
+\usepackage{fancyhdr}
+\usepackage{alphalph}
+\usepackage{indentfirst}
+
+% \setCJKsansfont{黑体}
+\setmainfont{PingFang SC}
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setmonofont{Monaco}
+
+\newenvironment{sol}
+  {\par\vspace{2mm}\noindent{\bf Solution}. }
+
+\lstset{escapeinside=``, breaklines=true, frame=none, extendedchars=false, basicstyle=\ttfamily, showstringspaces=false}
+
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{1.5ex plus 0.5ex minus 0.2ex}
+\linespread{1.1}
+
+\bibliographystyle{plain}
+
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\title{华东师范大学计算机科学技术系上机实验报告}
+
+\begin{document}
+\pagestyle{fancy}
+\chead{\small\color{gray}华东师范大学计算机科学技术系上机实验报告}
+\lhead{}
+\rhead{}
+\makeatletter
+\def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi%
+    \color{gray}\hrule\@height 0.2pt\@width\headwidth}
+    \vspace{6mm}}
+\makeatother
+
+\newcommand{\HRule}{\rule{\linewidth}{1mm}}
+\newcommand{\dai}{\textbf{Dais-CMX16$^+$}}
+
+{\center {\huge \bfseries \LARGE{华东师范大学计算机科学技术系上机实验报告}} \\ [0.8cm]
+                            
+    \small{
+        \begin{minipage}[t]{.32\linewidth}
+            \textbf{课程名称：}嵌入式原理与实践\\
+            \textbf{指导教师：}沈建华\\
+            \textbf{上机实践名称：} 综合练习\\
+            \textbf{实践编号：}实验 12
+        \end{minipage}
+        \begin{minipage}[t]{.32\linewidth}
+            \textbf{年级：}17 级\\
+            \textbf{姓名：}朱桐\\
+            \textbf{学号：}10175102111\\
+            \textbf{组号：}A
+        \end{minipage} 
+        \begin{minipage}[t]{.32\linewidth}
+            \textbf{上机实践成绩：} \\
+            \textbf{创新实践成绩：} \\
+            \textbf{上机实践日期：}2019/12/24\\
+            \textbf{上机实践时间：}2 学时\\
+        \end{minipage}
+    }
+    \HRule \\[0.5cm]
+}
+
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newminted{asm}{bgcolor=bg}
+\newminted{c}{bgcolor=bg}
+
+\NewDocumentCommand{\cw}{v}{\texttt{\textcolor{black}{#1}}}
+
+\section{实验目的}
+
+\begin{itemize}
+    \item 综合运用之前几次实验的内容
+\end{itemize}
+
+\section{实验设备}
+
+\begin{itemize}
+    \item MSP-EXP432P401R LaunchPad开发板
+\end{itemize}
+
+\section{实验内容}
+
+\section{实验步骤}
+
+为了完成一个比较复杂的功能，我们不应该心急一次想好所有的内容，而是吸取模块化思想，一次完成一个相对较小的模块，才能快速有效地设计好整个思路
+
+这里将整个功能分成三个模块
+
+\begin{itemize}
+    \item URAT 端口与串口工具的交互
+    \item Timer32 控制 LED2 亮度改变，周期为 1s
+    \item TimerA 控制 LED2 的亮度大小，要求0到9由暗到亮
+\end{itemize}
+
+\subsection{UART 串口}
+
+首先考虑UART 串口进行的操作
+
+\begin{itemize}
+    \item 读入数字直到空格，此时为读入状态
+    \item 在输出的时候如果执行读入，则打断继续到读入状态，或者忽略读入继续输出，这里采用第二种方案
+    \item 可以使用自适应长度（读到空格位置），或者限定只能读入三位。这里采用第一种方案
+\end{itemize}
+
+整理状态，有如下有限状态自动机。虽然画图可以非常思路清晰地展现程序地逻辑，但是我们之前已经将功能分割成小的模块，一般在写程序的时候不会画图
+
+对于URAT 控制我们一直输入字符直到空格位置，然后切换输入状态
+
+% \begin{figure}[h]
+%     \centering
+%     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,
+%         thick,base node/.style={circle,draw,minimum size=pt60}, real node/.style={double,circle,draw,minimum size=60pt}]
+    
+    
+    
+%         \node[initial,initial text={}, accepting, state] (1) {$\epsilon$};
+%         \node[state](2)[right of=1 ]{$51$}[above];
+        
+%         \path[]
+%         (1) edge [loop below]node {$0,101$} (1)
+%         (1) edge node {$51$} (2)
+%         (2) edge [loop above]node {$0$} (2);
+        
+%     \end{tikzpicture}
+%     \caption{URAT 串口的状态自动机}
+%     \label{fig:urat_dfa}
+% \end{figure}
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=4cm,
+        thick,base node/.style={circle,draw,minimum size=60pt}, real node/.style={double,circle,draw,minimum size=60pt}]
+                                                    
+        \node[initial, initial text={}, state,minimum size = 2cm] (1) {等待输入};
+        \node[state,minimum size = 2cm] (2) [right of = 1] {输出第一位};
+        \node[state,minimum size = 2cm] (3) [below of = 2] {输出第二位};
+        \node[minimum size = 2cm] (5) [below of = 3] {...};
+        \node[state,minimum size = 2cm] (4) [below of = 5] {最后一位};
+                                                
+                                                
+        \path[]
+        (1) edge [loop above] node {输入数字} (1)
+        (1) edge node {输入空格} (2)
+        (2) edge node {输出，保留1s，指针切换下一位} (3)
+        (3) edge node {输出，保留1s，指针切换下一位} (5)
+        (5) edge node {输出，保留1s，指针切换下一位} (4)
+        (4) edge node {输出，保留，初始化指针} (1);
+                                                        
+                                                
+                                                        
+    \end{tikzpicture}
+    \caption{URAT 串口的状态自动机}
+    \label{fig:urat_dfa}
+\end{figure}
+
+\subsection{Timer32}
+
+Timer32 用于控制 1s 的周期，在这部分中我们只考虑在输出的状态中，因为不输出的时候时钟是关掉的。状态自动机如图 \ref{fig:timera_dfa}
+
+Timer32 每次中断的时候代表 1s 周期到了然后切换下一个字符
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=4cm,
+        thick,base node/.style={circle,draw,minimum size=60pt}, real node/.style={double,circle,draw,minimum size=60pt}]
+                                                    
+        \node[initial, initial text={}, state,minimum size = 2cm] (1) {等待输入};
+        \node[state,minimum size = 2cm] (2) [right of = 1] {正在输出};
+                                                
+                                                
+        \path[]
+        (1) edge [loop above] node {输入数字} (1)
+        (1) edge [bend left] node {输入空格} (2)
+        (2) edge [loop above] node {中断，输出下一个字符}
+        (2) edge[bend left] node {输出最后一个数字，关闭时钟} (1);
+                                                        
+                                                                
+    \end{tikzpicture}
+    \caption{Timer32时钟状态自动机}
+    \label{fig:timer32_dfa}
+\end{figure}
+
+TimerA 也是随着 Timer32 中断，改变自身的占空比为下一个字符。如图 \ref{fig:timera_dfa}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=4cm,
+        thick,base node/.style={circle,draw,minimum size=60pt}, real node/.style={double,circle,draw,minimum size=60pt}]
+                                                    
+        \node[initial, initial text={}, state,minimum size = 2cm] (1) {等待输入};
+        \node[state,minimum size = 2cm] (2) [right of = 1] {正在输出};
+                                                
+                                                
+        \path[]
+        (1) edge [loop above] node {输入数字} (1)
+        (1) edge [bend left] node {输入空格} (2)
+        (2) edge [loop above] node {中断，占空比改变}
+        (2) edge[bend left] node {输出最后一个数字，关闭时钟，保持占空比} (1);
+                                                        
+                                                                
+    \end{tikzpicture}
+    \caption{TimerA 时钟状态自动机}
+    \label{fig:timera_dfa}
+\end{figure}
+
+\section{代码分析}
+
+配置单通道 LED2 蓝灯，GPIO 2.2, Timer32，TimerA，URAT 端口
+
+\begin{ccode}
+                    
+        
+    const Timer_A_UpModeConfig TA0 =
+    {
+        TIMER_A_CLOCKSOURCE_SMCLK,  
+        TIMER_A_CLOCKSOURCE_DIVIDER_1,  
+        PWM_PERIODS - 1,  
+        TIMER_A_TAIE_INTERRUPT_DISABLE,  
+        TIMER_A_CCIE_CCR0_INTERRUPT_DISABLE,
+        TIMER_A_DO_CLEAR  
+    };
+    
+    
+    Timer_A_CompareModeConfig TA0_CCR3_PWM =
+    {
+        TIMER_A_CAPTURECOMPARE_REGISTER_3,   
+        TIMER_A_CAPTURECOMPARE_INTERRUPT_DISABLE,  
+        TIMER_A_OUTPUTMODE_RESET_SET,  
+    PWM_PERIODS};
+    
+    const eUSCI_UART_Config uartConfig =
+    {
+        EUSCI_A_UART_CLOCKSOURCE_SMCLK,
+        6,
+        8,
+        17,
+        EUSCI_A_UART_NO_PARITY,
+        EUSCI_A_UART_LSB_FIRST,
+        EUSCI_A_UART_ONE_STOP_BIT,
+        EUSCI_A_UART_MODE, 
+    EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION};
+
+\end{ccode}
+    
+\begin{ccode}
+    uint8_t port_mapping[] =
+    {
+        PM_NONE,
+        PM_NONE,
+        PM_TA0CCR3A,
+        PM_NONE,
+        PM_NONE,
+        PM_NONE,
+        PM_NONE,
+    PM_NONE};
+                        
+    MAP_WDT_A_holdTimer();
+                        
+    //![Simple FPU Config]
+    MAP_FPU_enableModule();
+    MAP_CS_setDCOFrequency(DCO_Frequency);
+    MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    MAP_CS_initClockSignal(CS_HSMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_4);
+    MAP_CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_4);
+    //![Simple FPU Config]
+                        
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN1);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN1);
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
+                        
+    MAP_Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, 
+    TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+    MAP_Interrupt_enableInterrupt(INT_T32_INT1);
+    MAP_Timer32_enableInterrupt(TIMER32_0_BASE);
+    MAP_Timer32_clearInterruptFlag(TIMER32_0_BASE);
+                        
+    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1, 
+    GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
+    MAP_UART_initModule(EUSCI_A0_BASE, &uartConfig);
+    MAP_UART_enableModule(EUSCI_A0_BASE);
+    MAP_UART_enableInterrupt(EUSCI_A0_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
+    MAP_Interrupt_enableInterrupt(INT_EUSCIA0);
+                        
+    MAP_PMAP_configurePorts((const uint8_t *)port_mapping, PMAP_P2MAP, 
+    1 , PMAP_DISABLE_RECONFIGURATION);
+    MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, 
+    GPIO_PIN2, GPIO_PRIMARY_MODULE_FUNCTION);
+    MAP_Timer_A_configureUpMode(TIMER_A0_BASE, &TA0);
+    MAP_Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
+                        
+    MAP_Interrupt_enableInterrupt(INT_TA1_0);
+    TA0_CCR3_PWM.compareValue = 0;
+    output = 0;
+\end{ccode}
+
+URAT 中断函数，如果在输出，阻塞输入，否则增加输出。如果输入数字，保存在 \texttt{buf} 中。如果是空格，则开启输出模式
+
+\begin{ccode}
+    void EUSCIA0_IRQHandler(void)
+    {
+        char tmp[100];
+                        
+        uint32_t status = MAP_UART_getEnabledInterruptStatus(EUSCI_A0_BASE);
+        MAP_UART_clearInterruptFlag(EUSCI_A0_BASE, status);
+        if (output)
+        {
+            output = 0;
+            cur = 0;
+            TA0_CCR3_PWM.compareValue = 0;
+            start = 0;
+            MAP_Timer_A_stopTimer(TIMER_A0_BASE);
+            MAP_Timer32_haltTimer(TIMER32_0_BASE);
+        }
+        if (status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG)
+        {
+            char ch = MAP_UART_receiveData(EUSCI_A0_BASE);
+            if (ch == ' ')
+            {
+                len = cur;
+                cur = 0;
+                output = 1;
+                                                
+                MAP_Timer32_setCount(TIMER32_0_BASE, Duration * DCO_Frequency);
+                MAP_Timer32_startTimer(TIMER32_0_BASE, false);
+                                                
+                sprintf(tmp, "start to timer\n");
+                for (int i = 0; i < strlen(tmp); ++i)
+                {
+                    MAP_UART_transmitData(EUSCI_A0_BASE, tmp[i]);
+                }
+            }
+            else
+            {
+                buf[cur++] = ch;
+            }
+        }
+    }
+\end{ccode}
+
+TimerA 中断函数，如果输出到末尾会返回等待输入模式，每次中断会改变输出的字符。输出的方式就是控制 PWM 的占空比
+
+\begin{ccode}
+    void T32_INT1_IRQHandler(void)
+    {
+        char tmp[100];
+        if (output == 0) return;
+        MAP_Timer32_clearInterruptFlag(TIMER32_0_BASE);
+        char ch = buf[cur++];
+        sprintf(tmp, "ch=%c\n", ch);
+        for (int i = 0; i < strlen(tmp); ++i)
+        {
+            MAP_UART_transmitData(EUSCI_A0_BASE, tmp[i]);
+        }
+        if (cur == len)
+        {
+            output = 0;
+            cur = 0;
+            start = 0;
+        }
+        int digit = ch - '0' + 1;
+        // if (digit == 0)
+        //   digit = 10;
+        double coff = 1.0 * digit / 10;
+        TA0_CCR3_PWM.compareValue = PWM_PERIODS * coff;
+        MAP_Timer_A_initCompare(TIMER_A0_BASE, &TA0_CCR3_PWM);
+                
+        MAP_Timer32_setCount(TIMER32_0_BASE, Duration * DCO_Frequency);
+        MAP_Timer32_startTimer(TIMER32_0_BASE, false);
+    }
+\end{ccode}
+\section{总结}
+
+该设计还有额外特性：
+
+\begin{itemize}
+    \item 只要没有超过 \texttt{buf} 数组大小，可以接受任意长度的数字
+    \item 可以通过 URAT 串口进行调试
+    \item 注意隐式类型转换
+\end{itemize}
+    
+
+\section{附件}
+
+\end{document}

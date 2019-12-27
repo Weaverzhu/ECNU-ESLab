@@ -17,20 +17,20 @@
 
 const Timer_A_UpModeConfig TA0 =
     {
-        TIMER_A_CLOCKSOURCE_SMCLK,           // ѡ��SMCLK��Ϊʱ��Դ
-        TIMER_A_CLOCKSOURCE_DIVIDER_1,       // ��Ƶϵ��Ϊ1��Timer_A0=SMCLK/1=62.5k
-        PWM_PERIODS - 1,                     // ����ʱ��=PWM_PERIODS/Timer_A0=20ms(ע���Ӿ�����ʱ��ԼΪ100ms��400ms)������㿪ʼ��������������һ������
-        TIMER_A_TAIE_INTERRUPT_DISABLE,      // ���ö�ʱ���ж�
-        TIMER_A_CCIE_CCR0_INTERRUPT_DISABLE, // ���ö�ʱ��CCR0�ж�
-        TIMER_A_DO_CLEAR                     // �����ֵ
+        TIMER_A_CLOCKSOURCE_SMCLK,  
+        TIMER_A_CLOCKSOURCE_DIVIDER_1,  
+        PWM_PERIODS - 1,  
+        TIMER_A_TAIE_INTERRUPT_DISABLE,  
+        TIMER_A_CCIE_CCR0_INTERRUPT_DISABLE,
+        TIMER_A_DO_CLEAR  
 };
 
 
 Timer_A_CompareModeConfig TA0_CCR3_PWM =
     {
-        TIMER_A_CAPTURECOMPARE_REGISTER_3,        // CCR3ͨ��
-        TIMER_A_CAPTURECOMPARE_INTERRUPT_DISABLE, // ����CCR�ж�
-        TIMER_A_OUTPUTMODE_RESET_SET,             // ���ø�λ/��λ
+        TIMER_A_CAPTURECOMPARE_REGISTER_3,   
+        TIMER_A_CAPTURECOMPARE_INTERRUPT_DISABLE,  
+        TIMER_A_OUTPUTMODE_RESET_SET,  
         PWM_PERIODS};
 
 const eUSCI_UART_Config uartConfig =
@@ -42,7 +42,7 @@ const eUSCI_UART_Config uartConfig =
         EUSCI_A_UART_NO_PARITY,
         EUSCI_A_UART_LSB_FIRST,
         EUSCI_A_UART_ONE_STOP_BIT,
-        EUSCI_A_UART_MODE, // UART mode
+        EUSCI_A_UART_MODE, 
         EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION};
 
 int cur;
@@ -50,9 +50,6 @@ int output;
 char buf[N];
 int len, start = 0;
 
-void outputStuNo()
-{
-}
 
 int main(void)
 {
@@ -95,7 +92,7 @@ int main(void)
   MAP_UART_enableInterrupt(EUSCI_A0_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
   MAP_Interrupt_enableInterrupt(INT_EUSCIA0);
 
-  MAP_PMAP_configurePorts((const uint8_t *)port_mapping, PMAP_P2MAP /*端口2*/, 1 /*8个引脚*/, PMAP_DISABLE_RECONFIGURATION);
+  MAP_PMAP_configurePorts((const uint8_t *)port_mapping, PMAP_P2MAP /*�?�?2*/, 1 /*8�?引脚*/, PMAP_DISABLE_RECONFIGURATION);
   MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN2, GPIO_PRIMARY_MODULE_FUNCTION);
   MAP_Timer_A_configureUpMode(TIMER_A0_BASE, &TA0);
   MAP_Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
@@ -111,13 +108,7 @@ int main(void)
 
 void EUSCIA0_IRQHandler(void)
 {
-  // printf("in interrupt\n");
   char tmp[100];
-  // sprintf(tmp, "interrupt\n");
-  // for (int i = 0; i < strlen(tmp); ++i)
-  // {
-  //   MAP_UART_transmitData(EUSCI_A0_BASE, tmp[i]);
-  // }
 
   uint32_t status = MAP_UART_getEnabledInterruptStatus(EUSCI_A0_BASE);
   MAP_UART_clearInterruptFlag(EUSCI_A0_BASE, status);
@@ -133,12 +124,6 @@ void EUSCIA0_IRQHandler(void)
   if (status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG)
   {
     char ch = MAP_UART_receiveData(EUSCI_A0_BASE);
-    // char tmp[100];
-    // sprintf(tmp, "input=%c, cur=%d, output=%d\n", ch, cur, output);
-    // for (int i = 0; i < strlen(tmp); ++i)
-    // {
-    //   MAP_UART_transmitData(EUSCI_A0_BASE, tmp[i]);
-    // }
     if (ch == ' ')
     {
       len = cur;
@@ -158,11 +143,6 @@ void EUSCIA0_IRQHandler(void)
     {
       buf[cur++] = ch;
     }
-    // sprintf(tmp, "after input=%c, cur=%d, output=%d, stauts=%d\n", ch, cur, output, MAP_UART_getEnabledInterruptStatus(EUSCI_A0_BASE));
-    // for (int i = 0; i < strlen(tmp); ++i)
-    // {
-    //   MAP_UART_transmitData(EUSCI_A0_BASE, tmp[i]);
-    // }
   }
 }
 
@@ -170,10 +150,6 @@ void T32_INT1_IRQHandler(void)
 {
   char tmp[100];
   if (output == 0) return;
-  // if (!start) {
-  //   start = 1;
-  //   return;
-  // }
   MAP_Timer32_clearInterruptFlag(TIMER32_0_BASE);
   char ch = buf[cur++];
   sprintf(tmp, "ch=%c\n", ch);
